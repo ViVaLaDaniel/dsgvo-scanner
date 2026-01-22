@@ -42,7 +42,7 @@ async function seed() {
             console.error('Fatal: Could not sign in existing user:', signInError.message);
             return;
         }
-        authData.user = signInData.user;
+        authData.user = signInData.user as any;
     } else {
         console.error('Fatal auth error:', authError);
         return;
