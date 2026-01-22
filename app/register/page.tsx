@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createClient } from '@/lib/supabase/client';
 import { Shield } from 'lucide-react';
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const planFromUrl = searchParams.get('plan') || 'starter';
@@ -61,120 +61,128 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center p-4 font-sans">
-      <Card className="w-full max-w-md shadow-xl border-slate-200/60 backdrop-blur-sm bg-white/95">
-        <CardHeader className="text-center space-y-2">
-          <div className="flex justify-center mb-2">
-            <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
-              <Shield className="h-10 w-10 text-white" />
+    <Card className="w-full max-w-md shadow-xl border-slate-200/60 backdrop-blur-sm bg-white/95">
+      <CardHeader className="text-center space-y-2">
+        <div className="flex justify-center mb-2">
+          <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
+            <Shield className="h-10 w-10 text-white" />
+          </div>
+        </div>
+        <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">Kostenfrei registrieren</CardTitle>
+        <CardDescription className="text-slate-500 font-medium">
+          14 Tage kostenlos testen. Keine Kreditkarte erforderlich.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <Alert variant="destructive" className="bg-destructive/5 text-destructive border-destructive/20">
+              <AlertDescription className="font-medium">{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-2">
+            <label htmlFor="company" className="text-sm font-semibold text-slate-700">
+              Firmenname
+            </label>
+            <Input
+              id="company"
+              type="text"
+              placeholder="Ihre DSB-Agentur GmbH"
+              value={formData.company_name}
+              onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
+              required
+              className="bg-slate-50 border-slate-200 focus:bg-white transition-all"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="email" className="text-sm font-semibold text-slate-700">
+              E-Mail
+            </label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="ihr@email.de"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+              className="bg-slate-50 border-slate-200 focus:bg-white transition-all"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-semibold text-slate-700">
+                Passwort
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                minLength={8}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-all"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="passwordConfirm" className="text-sm font-semibold text-slate-700">
+                Bestätigen
+              </label>
+              <Input
+                id="passwordConfirm"
+                type="password"
+                placeholder="••••••••"
+                value={formData.passwordConfirm}
+                onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })}
+                required
+                minLength={8}
+                className="bg-slate-50 border-slate-200 focus:bg-white transition-all"
+              />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight text-slate-900">Kostenfrei registrieren</CardTitle>
-          <CardDescription className="text-slate-500 font-medium">
-            14 Tage kostenlos testen. Keine Kreditkarte erforderlich.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive" className="bg-destructive/5 text-destructive border-destructive/20">
-                <AlertDescription className="font-medium">{error}</AlertDescription>
-              </Alert>
-            )}
 
-            <div className="space-y-2">
-              <label htmlFor="company" className="text-sm font-semibold text-slate-700">
-                Firmenname
-              </label>
-              <Input
-                id="company"
-                type="text"
-                placeholder="Ihre DSB-Agentur GmbH"
-                value={formData.company_name}
-                onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                required
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-all"
-              />
-            </div>
+          <div className="space-y-2">
+            <label htmlFor="plan" className="text-sm font-semibold text-slate-700">
+              Ausgewählter Plan
+            </label>
+            <select
+              id="plan"
+              value={formData.plan}
+              onChange={(e) => setFormData({ ...formData, plan: e.target.value as any })}
+              className="w-full rounded-md border border-slate-200 bg-slate-50 p-2 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer hover:bg-white"
+            >
+              <option value="starter">Starter (49€/Monat - 10 Websites)</option>
+              <option value="professional">Professional (149€/Monat - 50 Websites)</option>
+              <option value="business">Business (399€/Monat - 200 Websites)</option>
+            </select>
+          </div>
 
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-semibold text-slate-700">
-                E-Mail
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="ihr@email.de"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-                className="bg-slate-50 border-slate-200 focus:bg-white transition-all"
-              />
-            </div>
+          <Button type="submit" className="w-full py-6 font-bold text-lg shadow-lg shadow-blue-500/20 transition-all active:scale-95" disabled={loading}>
+            {loading ? 'Wird erstellt...' : 'Konto erstellen'}
+          </Button>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-semibold text-slate-700">
-                  Passwort
-                </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  minLength={8}
-                  className="bg-slate-50 border-slate-200 focus:bg-white transition-all"
-                />
-              </div>
+          <div className="pt-2 text-center text-sm text-slate-600 font-medium">
+            Bereits registriert?{' '}
+            <Link href="/login" className="text-blue-600 hover:text-blue-700 transition-colors font-bold underline-offset-4 hover:underline">
+              Jetzt anmelden
+            </Link>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
 
-              <div className="space-y-2">
-                <label htmlFor="passwordConfirm" className="text-sm font-semibold text-slate-700">
-                  Bestätigen
-                </label>
-                <Input
-                  id="passwordConfirm"
-                  type="password"
-                  placeholder="••••••••"
-                  value={formData.passwordConfirm}
-                  onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })}
-                  required
-                  minLength={8}
-                  className="bg-slate-50 border-slate-200 focus:bg-white transition-all"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="plan" className="text-sm font-semibold text-slate-700">
-                Ausgewählter Plan
-              </label>
-              <select
-                id="plan"
-                value={formData.plan}
-                onChange={(e) => setFormData({ ...formData, plan: e.target.value as any })}
-                className="w-full rounded-md border border-slate-200 bg-slate-50 p-2 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-blue-500 transition-all cursor-pointer hover:bg-white"
-              >
-                <option value="starter">Starter (49€/Monat - 10 Websites)</option>
-                <option value="professional">Professional (149€/Monat - 50 Websites)</option>
-                <option value="business">Business (399€/Monat - 200 Websites)</option>
-              </select>
-            </div>
-
-            <Button type="submit" className="w-full py-6 font-bold text-lg shadow-lg shadow-blue-500/20 transition-all active:scale-95" disabled={loading}>
-              {loading ? 'Wird erstellt...' : 'Konto erstellen'}
-            </Button>
-
-            <div className="pt-2 text-center text-sm text-slate-600 font-medium">
-              Bereits registriert?{' '}
-              <Link href="/login" className="text-blue-600 hover:text-blue-700 transition-colors font-bold underline-offset-4 hover:underline">
-                Jetzt anmelden
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+export default function RegisterPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center p-4 font-sans">
+      <Suspense fallback={<div>Laden...</div>}>
+        <RegisterForm />
+      </Suspense>
     </div>
   );
 }
