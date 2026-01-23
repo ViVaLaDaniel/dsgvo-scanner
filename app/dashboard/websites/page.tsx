@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,13 +21,9 @@ export default function WebsitesPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -37,7 +33,7 @@ export default function WebsitesPage() {
       .select('*')
       .eq('id', user.id)
       .single();
-    
+
     if (profileData) setProfile(profileData);
 
     // Load websites
@@ -45,9 +41,13 @@ export default function WebsitesPage() {
       .from('websites')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (websitesData) setWebsites(websitesData);
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -207,7 +207,7 @@ export default function WebsitesPage() {
               </div>
               <p className="text-slate-900 font-bold text-lg">Noch keine Websites hinzugefügt</p>
               <p className="text-sm text-slate-500 mt-2 font-medium">
-                Klicken Sie auf "Website hinzufügen" um Ihren ersten Mandanten zu verwalten
+                Klicken Sie auf &quot;Website hinzufügen&quot; um Ihren ersten Mandanten zu verwalten
               </p>
             </CardContent>
           </Card>
