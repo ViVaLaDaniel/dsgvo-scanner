@@ -26,7 +26,7 @@ export default function DashboardPage() {
     avgScore: 0
   });
   const [recentScans, setRecentScans] = useState<any[]>([]);
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     async function loadDashboardData() {
