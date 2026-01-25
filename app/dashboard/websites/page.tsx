@@ -33,45 +33,6 @@ export default function WebsitesPage() {
   }, []);
 
   const loadData = async () => {
-    const isTestSession = document.cookie.includes('test-session=true');
-
-    if (isTestSession) {
-      setProfile({
-        website_limit: 50,
-      } as any);
-
-      // Load saved scans to link with websites
-      const sc = JSON.parse(sessionStorage.getItem('dashboard-scans') || '[]');
-      setSavedScans(sc);
-
-      // Check if we have websites in session storage to make it feel persistent
-      const savedWebsites = sessionStorage.getItem('mock-websites');
-      if (savedWebsites) {
-        setWebsites(JSON.parse(savedWebsites));
-      } else {
-        const initialWebsites: Website[] = [
-          {
-            id: '1',
-            client_name: 'Muster Mandant GmbH',
-            url: 'https://muster-website.de',
-            domain: 'muster-website.de',
-            status: 'active',
-            created_at: new Date().toISOString(),
-          } as any,
-          {
-            id: '2',
-            client_name: 'Beispiel Shop e.K.',
-            url: 'https://beispiel-shop.com',
-            domain: 'beispiel-shop.com',
-            status: 'active',
-            created_at: new Date().toISOString(),
-          } as any,
-        ];
-        setWebsites(initialWebsites);
-        sessionStorage.setItem('mock-websites', JSON.stringify(initialWebsites));
-      }
-      return;
-    }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -98,34 +59,6 @@ export default function WebsitesPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    const isTestSession = document.cookie.includes('test-session=true');
-
-    if (isTestSession) {
-      try {
-        const url = new URL(formData.url);
-        const newWebsite: Website = {
-          id: Math.random().toString(36).substr(2, 9),
-          client_name: formData.client_name,
-          url: formData.url,
-          domain: url.hostname,
-          status: 'active',
-          created_at: new Date().toISOString(),
-        } as any;
-
-        const updatedWebsites = [newWebsite, ...websites];
-        setWebsites(updatedWebsites);
-        sessionStorage.setItem('mock-websites', JSON.stringify(updatedWebsites));
-        
-        setFormData({ url: '', client_name: '' });
-        setShowAddForm(false);
-      } catch (err: any) {
-        setError('Ungültige URL');
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !profile) return;
@@ -166,14 +99,6 @@ export default function WebsitesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Website wirklich löschen?')) return;
 
-    const isTestSession = document.cookie.includes('test-session=true');
-    if (isTestSession) {
-      const updatedWebsites = websites.filter(w => w.id !== id);
-      setWebsites(updatedWebsites);
-      sessionStorage.setItem('mock-websites', JSON.stringify(updatedWebsites));
-      return;
-    }
-
     try {
       const { error: deleteError } = await supabase
         .from('websites')
@@ -190,18 +115,6 @@ export default function WebsitesPage() {
   const handleScanNow = async (websiteId: string, hasScan: boolean) => {
     if (hasScan) {
       router.push(`/dashboard/scans/${websiteId}`);
-      return;
-    }
-
-    const isTestSession = document.cookie.includes('test-session=true');
-    if (isTestSession) {
-      setScanningId(websiteId);
-      
-      // Simulate scanning progress
-      setTimeout(() => {
-        router.push(`/dashboard/scans/${websiteId}`);
-        setScanningId(null);
-      }, 2000);
       return;
     }
 

@@ -78,8 +78,7 @@ export default function ScanResultPage() {
       try {
         setLoading(true);
       
-      const savedWebsites = sessionStorage.getItem('mock-websites');
-      const websites = savedWebsites ? JSON.parse(savedWebsites) : [];
+      const websites: any[] = []; // In production, this would be fetched from DB or passed as state
       const currentWebsite = websites.find((w: any) => w.id === params.id) || {
         url: 'https://vitbikes.de/store/reutlingen-28',
         client_name: 'Vitbikes Reutlingen'

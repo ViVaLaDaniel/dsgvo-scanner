@@ -46,20 +46,17 @@
 - `middleware.ts`: Защита маршрутов и управление сессиями
 
 ## Текущий статус функционала
-- [x] Миграция на Supabase (Auth + DB)
-- [x] Аутентификация (SignUp, SignIn, SignOut)
-- [x] Middleware защита маршрутов (защита `/dashboard`)
-- [x] CRUD веб-сайтов (Интеграция с Supabase + SessionStorage Mock)
-- [x] Динамический Dashboard (реальная статистика и счетчики в сайдбаре)
+- [x] Full Production Authentication (Test-Mode removed)
+- [x] CRUD веб-сайтов (Полная интеграция с Supabase)
+- [x] Динамический Dashboard (реальная статистика из БД)
 - [x] **Smart Scanner Logic** (Анализ URL: Google Fonts, GTM, YouTube)
 - [x] Детальный просмотр отчетов (с решением проблем)
 - [x] **White-Label Настройки** (Логотип, цвета, футер)
 - [x] Экспорт в PDF (брендированная печатная версия)
 - [x] Полная интерактивность (клики по карточкам и строкам таблиц)
 
-## Планы на завтра (Launch Roadmap)
-- [ ] Деплой на GitHub
-- [ ] Подключение Production DB
+- [x] Деплой на GitHub & Production Vercel
+- [x] Настройка Environment Variables
 - [ ] Google OAuth & Email Verification
 - [ ] Интеграция Stripe (Платежи)
 - [ ] Реальные Email уведомления

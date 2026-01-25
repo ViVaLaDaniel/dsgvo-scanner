@@ -22,28 +22,6 @@ export default function DashboardLayout({
 
   useEffect(() => {
     async function loadProfile() {
-      // Check for test session first
-      const isTestSession = document.cookie.includes('test-session=true');
-
-      if (isTestSession) {
-        setProfile({
-          id: 'test-user',
-          company_name: 'Dev Tester GmbH',
-          website_limit: 50,
-          plan: 'professional',
-          created_at: new Date().toISOString()
-        } as any);
-
-        // Load website count
-        const savedWebsites = sessionStorage.getItem('mock-websites');
-        if (savedWebsites) {
-          setWebsiteCount(JSON.parse(savedWebsites).length);
-        } else {
-          setWebsiteCount(2); // Initial default count
-        }
-        return;
-      }
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         router.push('/login');

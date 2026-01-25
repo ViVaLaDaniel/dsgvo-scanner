@@ -55,10 +55,9 @@ export default async function proxy(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  const isTestSession = request.cookies.get('test-session')?.value === 'true'
-
+  
   // Protect dashboard routes
-  if (request.nextUrl.pathname.startsWith('/dashboard') && !user && !isTestSession) {
+  if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
