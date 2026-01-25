@@ -24,7 +24,7 @@ export default function WebsitesPage() {
   const [loading, setLoading] = useState(false);
   const [scanningId, setScanningId] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   const [savedScans, setSavedScans] = useState<any[]>([]);
 

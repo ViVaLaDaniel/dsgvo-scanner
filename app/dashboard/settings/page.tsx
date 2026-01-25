@@ -8,10 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Shield, User, Building, CreditCard, Save } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { UserProfile } from '@/types/supabase';
-
-// Assuming 'cn' utility is available globally or imported elsewhere if needed.
-// For example: import { cn } from '@/lib/utils';
-const cn = (...classes: string[]) => classes.filter(Boolean).join(' ');
+import { cn } from '@/lib/utils';
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -21,7 +18,7 @@ export default function SettingsPage() {
     report_footer: 'Professionelles DSGVO-Monitoring'
   });
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
 
   useEffect(() => {
     async function loadProfile() {

@@ -16,7 +16,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [websiteCount, setWebsiteCount] = useState(0);
 

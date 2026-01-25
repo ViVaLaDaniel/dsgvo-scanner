@@ -27,7 +27,7 @@ export default function DashboardPage() {
     avgScore: 0
   });
   const [recentScans, setRecentScans] = useState<any[]>([]);
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
   const router = useRouter();
 
   useEffect(() => {
@@ -133,6 +133,7 @@ export default function DashboardPage() {
 
       if (scans) {
         setRecentScans(scans.map((s: any) => ({
+          id: s.id,
           name: s.website?.client_name || 'Unbekannt',
           url: s.website?.url?.replace('https://', '')?.replace('http://', '') || '',
           date: new Date(s.created_at).toLocaleDateString('de-DE'),
