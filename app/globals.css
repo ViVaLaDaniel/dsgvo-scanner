@@ -103,3 +103,32 @@
   --radius-sm: calc(var(--radius) - 4px);
 }
 
+@layer utilities {
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    .print-only {
+      display: block !important;
+    }
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    aside, header, nav, button {
+      display: none !important;
+    }
+    main {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .card {
+      border: 1px solid #e2e8f0 !important;
+      box-shadow: none !important;
+    }
+  }
+
+  .print-only {
+    display: none;
+  }
+}

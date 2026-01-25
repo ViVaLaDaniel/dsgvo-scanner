@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -26,10 +27,75 @@ export default function DashboardPage() {
     avgScore: 0
   });
   const [recentScans, setRecentScans] = useState<any[]>([]);
-  const [supabase] = useState(() => createClient());
+  const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     async function loadDashboardData() {
+      // Check for test session first
+      const isTestSession = document.cookie.includes('test-session=true');
+      
+      if (isTestSession) {
+        // Load websites to get real count
+        const savedWebsites = JSON.parse(sessionStorage.getItem('mock-websites') || '[]');
+        
+        // Load saved scans from session storage
+        const savedScans = JSON.parse(sessionStorage.getItem('dashboard-scans') || '[]');
+        
+        const defaultScans = [
+          {
+            id: 'vitbikes-demo-reutlingen',
+            name: 'Vitbikes Reutlingen',
+            url: 'vitbikes.de/.../reutlingen-28',
+            date: new Date().toLocaleDateString('de-DE'),
+            status: 'Kritisch',
+            violations: 4,
+            risk: 'high',
+            score: 68
+          },
+          {
+            id: 'muster-demo',
+            name: 'Muster Mandant GmbH',
+            url: 'muster-website.de',
+            date: new Date().toLocaleDateString('de-DE'),
+            status: 'Warnung',
+            violations: 14,
+            risk: 'warning',
+            score: 84
+          },
+          {
+            id: 'kanzlei-demo',
+            name: 'Kanzlei Dr. Demo',
+            url: 'kanzlei-demo.at',
+            date: new Date().toLocaleDateString('de-DE'),
+            status: 'Sicher',
+            violations: 0,
+            risk: 'safe',
+            score: 100
+          }
+        ];
+
+        // Combine saved scans (highest priority) with defaults
+        const combinedScans = [...savedScans, ...defaultScans.filter(ds => !savedScans.some((ss: any) => ss.url === ds.url))].slice(0, 8);
+        
+        const criticalCount = combinedScans.filter(s => s.risk === 'high').length;
+        
+        // Calculate average score from all scans that have a score
+        const scansWithScore = combinedScans.filter(s => s.score !== undefined);
+        const avgScore = scansWithScore.length > 0 
+          ? Math.round(scansWithScore.reduce((acc, curr) => acc + curr.score, 0) / scansWithScore.length)
+          : 100;
+
+        setStats({
+          websitesCount: savedWebsites.length || 3,
+          websiteLimit: 50,
+          criticalCount: criticalCount,
+          avgScore: avgScore
+        });
+        setRecentScans(combinedScans);
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -180,7 +246,11 @@ export default function DashboardPage() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {recentScans.map((item, idx) => (
-                      <tr key={idx} className="group hover:bg-slate-50/50 transition-colors">
+                      <tr 
+                        key={idx} 
+                        onClick={() => item.id && router.push(`/dashboard/scans/${item.id}`)}
+                        className="group hover:bg-slate-50 transition-all cursor-pointer border-transparent hover:border-l-4 hover:border-l-blue-600"
+                      >
                         <td className="py-4">
                           <div className="font-bold text-slate-900 truncate max-w-[180px]">{item.name}</div>
                           <div className="text-slate-400 text-xs truncate max-w-[180px] flex items-center gap-1.5 group-hover:text-blue-500 transition-colors">
@@ -238,9 +308,11 @@ export default function DashboardPage() {
               <p className="text-sm font-bold leading-snug">Consent-Banner Fehler bei vielen Websites erkannt</p>
             </div>
 
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold border-none h-11 shadow-lg shadow-blue-500/20">
-              Details im Scanner ansehen
-            </Button>
+            <Link href="/dashboard/websites" className="block w-full">
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold border-none h-11 shadow-lg shadow-blue-500/20">
+                Details im Scanner ansehen
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       </div>

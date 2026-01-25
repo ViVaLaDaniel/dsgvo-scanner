@@ -13,9 +13,12 @@ export default function HomePage() {
             <div className="bg-blue-600 p-1.5 rounded-lg transition-transform group-hover:scale-110">
               <Shield className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              DSGVO<span className="text-blue-600">Scanner</span>
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                DSGVO<span className="text-blue-600">Scanner</span>
+              </h1>
+              <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest border border-blue-200">Beta</span>
+            </div>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
             <Link href="#features" className="hover:text-blue-600 transition-colors">Funktionen</Link>
@@ -23,11 +26,11 @@ export default function HomePage() {
           </nav>
           <div className="flex gap-4 items-center">
             <Link href="/login">
-              <Button variant="ghost" className="font-semibold">Anmelden</Button>
+              <Button variant="ghost" className="font-bold text-slate-600 hover:text-blue-600">Anmelden</Button>
             </Link>
-            <Link href="/register">
-              <Button className="shadow-lg shadow-blue-500/20 font-semibold px-6">
-                Kostenlos testen
+            <Link href="/login">
+              <Button className="shadow-lg shadow-blue-500/20 font-bold px-6 bg-blue-600 hover:bg-blue-700 transition-all">
+                Kostenlos Testen
               </Button>
             </Link>
           </div>
@@ -55,9 +58,9 @@ export default function HomePage() {
             sofortige Benachrichtigungen bei DSGVO-Verstößen. Sparen Sie Zeit und minimieren Sie Haftungsrisiken.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/register">
+            <Link href="/login">
               <Button size="lg" className="text-lg px-8 py-7 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 transition-all group">
-                14 Tage kostenlos testen
+                Jetzt testen (Dev Mode)
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
@@ -202,7 +205,7 @@ export default function HomePage() {
                   </ul>
                 </CardContent>
                 <div className="p-6 pt-0">
-                  <Link href="/register?plan=starter">
+                  <Link href="/login">
                     <Button variant="outline" className="w-full py-6 font-bold">Plan wählen</Button>
                   </Link>
                 </div>

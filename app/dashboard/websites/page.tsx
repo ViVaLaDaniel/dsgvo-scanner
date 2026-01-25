@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createClient } from '@/lib/supabase/client';
 import { Website, UserProfile } from '@/types/supabase';
-import { Plus, Globe, Trash2, Play, ExternalLink } from 'lucide-react';
+import { Plus, Globe, Trash2, Play, ExternalLink, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function WebsitesPage() {
@@ -21,9 +22,56 @@ export default function WebsitesPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [supabase] = useState(() => createClient());
+  const [scanningId, setScanningId] = useState<string | null>(null);
+  const router = useRouter();
+  const supabase = createClient();
 
-  const loadData = useCallback(async () => {
+  const [savedScans, setSavedScans] = useState<any[]>([]);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    const isTestSession = document.cookie.includes('test-session=true');
+
+    if (isTestSession) {
+      setProfile({
+        website_limit: 50,
+      } as any);
+
+      // Load saved scans to link with websites
+      const sc = JSON.parse(sessionStorage.getItem('dashboard-scans') || '[]');
+      setSavedScans(sc);
+
+      // Check if we have websites in session storage to make it feel persistent
+      const savedWebsites = sessionStorage.getItem('mock-websites');
+      if (savedWebsites) {
+        setWebsites(JSON.parse(savedWebsites));
+      } else {
+        const initialWebsites: Website[] = [
+          {
+            id: '1',
+            client_name: 'Muster Mandant GmbH',
+            url: 'https://muster-website.de',
+            domain: 'muster-website.de',
+            status: 'active',
+            created_at: new Date().toISOString(),
+          } as any,
+          {
+            id: '2',
+            client_name: 'Beispiel Shop e.K.',
+            url: 'https://beispiel-shop.com',
+            domain: 'beispiel-shop.com',
+            status: 'active',
+            created_at: new Date().toISOString(),
+          } as any,
+        ];
+        setWebsites(initialWebsites);
+        sessionStorage.setItem('mock-websites', JSON.stringify(initialWebsites));
+      }
+      return;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -43,16 +91,41 @@ export default function WebsitesPage() {
       .order('created_at', { ascending: false });
 
     if (websitesData) setWebsites(websitesData);
-  }, [supabase]);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+    // Load real scans too if production
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    const isTestSession = document.cookie.includes('test-session=true');
+
+    if (isTestSession) {
+      try {
+        const url = new URL(formData.url);
+        const newWebsite: Website = {
+          id: Math.random().toString(36).substr(2, 9),
+          client_name: formData.client_name,
+          url: formData.url,
+          domain: url.hostname,
+          status: 'active',
+          created_at: new Date().toISOString(),
+        } as any;
+
+        const updatedWebsites = [newWebsite, ...websites];
+        setWebsites(updatedWebsites);
+        sessionStorage.setItem('mock-websites', JSON.stringify(updatedWebsites));
+        
+        setFormData({ url: '', client_name: '' });
+        setShowAddForm(false);
+      } catch (err: any) {
+        setError('Ungültige URL');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !profile) return;
@@ -93,6 +166,14 @@ export default function WebsitesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Website wirklich löschen?')) return;
 
+    const isTestSession = document.cookie.includes('test-session=true');
+    if (isTestSession) {
+      const updatedWebsites = websites.filter(w => w.id !== id);
+      setWebsites(updatedWebsites);
+      sessionStorage.setItem('mock-websites', JSON.stringify(updatedWebsites));
+      return;
+    }
+
     try {
       const { error: deleteError } = await supabase
         .from('websites')
@@ -106,7 +187,24 @@ export default function WebsitesPage() {
     }
   };
 
-  const handleScanNow = async (websiteId: string) => {
+  const handleScanNow = async (websiteId: string, hasScan: boolean) => {
+    if (hasScan) {
+      router.push(`/dashboard/scans/${websiteId}`);
+      return;
+    }
+
+    const isTestSession = document.cookie.includes('test-session=true');
+    if (isTestSession) {
+      setScanningId(websiteId);
+      
+      // Simulate scanning progress
+      setTimeout(() => {
+        router.push(`/dashboard/scans/${websiteId}`);
+        setScanningId(null);
+      }, 2000);
+      return;
+    }
+
     try {
       const { error: scanError } = await supabase.from('scans').insert({
         website_id: websiteId,
@@ -212,63 +310,118 @@ export default function WebsitesPage() {
             </CardContent>
           </Card>
         ) : (
-          websites.map((website) => (
-            <Card key={website.id} className="group hover:shadow-lg hover:border-blue-200 transition-all duration-300">
-              <CardContent className="flex flex-col md:flex-row md:items-center justify-between p-6 gap-6">
-                <div className="flex items-center gap-5">
-                  <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm border border-blue-100 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
-                    <Globe className="h-7 w-7" />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-slate-900 text-lg">{website.client_name}</h3>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <a 
-                        href={website.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-sm font-bold text-blue-600 hover:text-blue-700 underline-offset-4 hover:underline flex items-center gap-1"
-                      >
-                        {website.domain} <ExternalLink className="h-3 w-3" />
-                      </a>
-                    </div>
-                    <p className="text-[10px] font-bold text-slate-400 mt-1.5 uppercase tracking-widest">
-                      Hinzugefügt am {new Date(website.created_at).toLocaleDateString('de-DE')}
-                    </p>
-                  </div>
-                </div>
+          websites.map((website) => {
+            const scanResult = savedScans.find((s: any) => s.id === website.id || s.url === website.url);
+            const score = scanResult?.score !== undefined ? scanResult.score : null;
 
-                <div className="flex flex-wrap items-center gap-3">
-                  <Badge className={cn(
-                    "font-bold uppercase tracking-widest px-3 py-1 text-[10px] shadow-sm",
-                    website.status === 'active' ? "bg-green-50 text-green-700 border-green-200" : "bg-slate-100 text-slate-500 border-slate-200"
-                  )}>
-                    {website.status === 'active' ? 'Aktiv' : website.status}
-                  </Badge>
-                  
-                  <div className="h-8 w-px bg-slate-100 mx-1 hidden md:block" />
-                  
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleScanNow(website.id)}
-                    className="font-bold border-slate-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all h-10 px-4"
-                  >
-                    <Play className="h-3.5 w-3.5 mr-2 fill-current" />
-                    Jetzt scannen
-                  </Button>
-                  
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => handleDelete(website.id)}
-                    className="text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all h-10 w-10 p-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+            return (
+              <Card 
+                key={website.id} 
+                className={cn(
+                  "group transition-all duration-300 overflow-hidden border-slate-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/5",
+                  scanResult ? "cursor-pointer hover:-translate-y-0.5" : "cursor-default"
+                )}
+                onClick={() => scanResult && handleScanNow(website.id, true)}
+              >
+                <CardContent className="flex flex-col md:flex-row md:items-center justify-between p-6 gap-6 relative">
+                  <div className="flex items-center gap-5">
+                    <div className={cn(
+                      "h-14 w-14 rounded-2xl flex items-center justify-center shadow-sm border transition-all duration-500",
+                      score ? (score < 70 ? "bg-red-50 text-red-600 border-red-100 ring-4 ring-red-50/50" : "bg-blue-50 text-blue-600 border-blue-100 ring-4 ring-blue-50/50") : "bg-slate-50 text-slate-400 border-slate-100"
+                    )}>
+                      <Globe className={cn("h-7 w-7 transition-transform duration-500", scanResult && "group-hover:scale-110 group-hover:rotate-12")} />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-slate-900 text-lg group-hover:text-blue-600 transition-colors">{website.client_name}</h3>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <a 
+                          href={website.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-sm font-bold text-slate-400 hover:text-blue-600 underline-offset-4 hover:underline flex items-center gap-1 transition-colors"
+                        >
+                          {website.domain} <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-400 mt-1.5 uppercase tracking-widest">
+                        Hinzugefügt am {new Date(website.created_at).toLocaleDateString('de-DE')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-6">
+                    {score !== null && (
+                      <div className="flex flex-col items-center">
+                        <div className={cn(
+                          "text-2xl font-black transition-transform duration-500 group-hover:scale-110",
+                          score < 70 ? "text-red-500" : "text-blue-600"
+                        )}>
+                          {score}%
+                        </div>
+                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">DSGVO Score</div>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-3">
+                      <Badge className={cn(
+                        "font-bold uppercase tracking-widest px-3 py-1 text-[10px] shadow-sm",
+                        website.status === 'active' ? "bg-green-50 text-green-700 border-green-200" : "bg-slate-100 text-slate-500 border-slate-200"
+                      )}>
+                        {website.status === 'active' ? 'Aktiv' : website.status}
+                      </Badge>
+                      
+                      <div className="h-8 w-px bg-slate-100 mx-1 hidden md:block" />
+                      
+                      <Button 
+                        size="sm" 
+                        variant={scanResult ? "outline" : "default"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleScanNow(website.id, !!scanResult);
+                        }}
+                        disabled={scanningId === website.id}
+                        className={cn(
+                          "font-bold transition-all h-10 px-4",
+                          scanResult ? "border-blue-200 text-blue-600 hover:bg-blue-600 hover:text-white" : "bg-blue-600 shadow-lg shadow-blue-500/20",
+                          scanningId === website.id && "bg-blue-50 text-blue-600 border-blue-200"
+                        )}
+                      >
+                        {scanningId === website.id ? (
+                          <>
+                            <div className="h-3 w-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
+                            Scanning...
+                          </>
+                        ) : scanResult ? (
+                          <>
+                            <ShieldCheck className="h-3.5 w-3.5 mr-2" />
+                            Bericht
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-3.5 w-3.5 mr-2 fill-current" />
+                            Jetzt scannen
+                          </>
+                        )}
+                      </Button>
+                      
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(website.id);
+                        }}
+                        className="text-slate-300 hover:text-red-600 hover:bg-red-50 transition-all h-10 w-10 p-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
         )}
       </div>
     </div>

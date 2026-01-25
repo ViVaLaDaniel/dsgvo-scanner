@@ -38,6 +38,13 @@ export default function LoginPage() {
     router.refresh();
   };
 
+  const handleTestLogin = () => {
+    // Set a cookie that will be checked in middleware and dashboard
+    document.cookie = 'test-session=true; path=/; max-age=3600'; // 1 hour
+    router.push('/dashboard');
+    router.refresh();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center p-4 font-sans">
       <Card className="w-full max-w-md shadow-xl border-slate-200/60 backdrop-blur-sm bg-white/95">
@@ -92,6 +99,24 @@ export default function LoginPage() {
 
             <Button type="submit" className="w-full py-6 font-bold text-lg shadow-lg shadow-blue-500/20" disabled={loading}>
               {loading ? 'Wird geladen...' : 'Anmelden'}
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-slate-200" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-slate-500 font-bold tracking-widest">Dev Mode</span>
+              </div>
+            </div>
+
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full py-6 font-bold text-lg border-blue-200 text-blue-600 hover:bg-blue-50 transition-all border-2"
+              onClick={handleTestLogin}
+            >
+              Test-Login (Ohne Supabase)
             </Button>
 
             <div className="pt-2 text-center text-sm text-slate-600 font-medium">
