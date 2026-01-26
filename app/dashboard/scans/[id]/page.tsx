@@ -11,12 +11,14 @@ import {
   ArrowLeft, 
   ExternalLink, 
   AlertCircle, 
+  AlertTriangle,
   CheckCircle2,
   Info,
   Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 const MOCK_FINDINGS = [
   {
@@ -73,150 +75,46 @@ export default function ScanResultPage() {
       setBranding(JSON.parse(savedBranding));
     }
 
-    // Simulate a "real" scan analysis
-    async function performScan() {
+    // Load real scan data from Supabase
+    async function loadScanData() {
       try {
         setLoading(true);
-      
-      const websites: any[] = []; // In production, this would be fetched from DB or passed as state
-      const currentWebsite = websites.find((w: any) => w.id === params.id) || {
-        url: 'https://vitbikes.de/store/reutlingen-28',
-        client_name: 'Vitbikes Reutlingen'
-      };
+        const supabase = createClient();
+        
+        const { data: scan, error: scanError } = await supabase
+          .from('scans')
+          .select('*, website:websites(*)')
+          .eq('id', params.id)
+          .single();
 
-      const url = currentWebsite.url.toLowerCase();
-      const detectedFindings = [];
-      let score = 100;
+        if (scanError || !scan) {
+          console.error('Scan not found:', scanError);
+          return;
+        }
 
-      if (url.includes('vitbikes.de') || url.includes('google')) {
-         detectedFindings.push({
-            category: 'Drittanbieter & CDNs',
-            title: 'Google Fonts (Remote)',
-            description: 'Schriftarten werden direkt von Google-Servern (fonts.googleapis.com) geladen. Dabei wird die IP-Adresse des Nutzers in die USA übertragen.',
-            severity: 'High',
-            recommendation: 'Laden Sie die Schriftarten herunter und hosten Sie diese lokal auf Ihrem eigenen Server.',
-            impact: 'Abmahngefahr durch LG München I Urteil (Az. 3 O 191/22).',
-            solution: {
-              steps: [
-                'Besuchen Sie google-webfonts-helper.herokuapp.com.',
-                'Suchen Sie nach den verwendeten Schriftarten.',
-                'Wählen Sie die Zeichensätze (z.B. latin) und Stile aus.',
-                'Laden Sie das ZIP-Archiv herunter и entpacken Sie es in Ihren `/public/fonts` Ordner.',
-                'Kopieren Sie das generierte CSS in Ihre Stylesheet-Datei.'
-              ],
-              code: '@font-face {\n  font-family: "MyFont";\n  src: url("/fonts/myfont.woff2") format("woff2");\n  font-display: swap;\n}',
-              tip: 'Nutzen Sie `font-display: swap`, um die Ladezeit der Seite nicht negativ zu beeinflussen.'
-            }
-         });
-         score -= 15;
-      }
-
-      if (url.includes('vitbikes.de') || url.includes('googletagmanager')) {
-        detectedFindings.push({
-          category: 'Tracking & Analytics',
-          title: 'Google Tag Manager',
-          description: 'GTM wird ohne vorherige Einwilligung des Nutzers geladen, was das Setzen von Tracking-Cookies ermöglichen kann.',
-          severity: 'High',
-          recommendation: 'Stellen Sie sicher, dass das GTM-Skript erst nach der Einwilligung im Cookie-Banner gefeuert wird.',
-          impact: 'Verstoß gegen TDDDG & DSGVO.',
-          solution: {
-            steps: [
-              'Entfernen Sie das feste GTM-Skript aus dem `<head>` Bereich.',
-              'Integrieren Sie eine Consent Management Platform (CMP).',
-              'Konfigurieren Sie den GTM-Code so, dass er erst nach der Zustimmung (`analytics_storage` granted) geladen wird.',
-              'Nutzen Sie den Google Consent Mode (v2).'
-            ],
-            code: 'window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag("consent", "default", {\n  "analytics_storage": "denied",\n  "ad_storage": "denied"\n});',
-            tip: 'Testen Sie Ihre Implementierung mit dem GTM-Vorschaumedus, um sicherzustellen, dass keine Daten vorab fließen.'
-          }
+        const dbFindings = (scan.results as any)?.findings || [];
+        setScanData({
+          url: scan.website?.url,
+          client_name: scan.website?.client_name,
+          date: new Date(scan.created_at).toLocaleDateString('de-DE'),
+          score: scan.risk_score,
+          status: scan.risk_score < 50 ? 'Kritisch' : scan.risk_score < 85 ? 'Warnung' : 'Sicher'
         });
-        score -= 20;
+        setFindings(dbFindings);
+      } catch (err) {
+        console.error('Failed to load scan data:', err);
+      } finally {
+        setLoading(false);
       }
-
-      if (url.includes('youtube.com') || url.includes('vitbikes.de')) {
-        detectedFindings.push({
-          category: 'Medien',
-          title: 'YouTube Embeds',
-          description: 'Eingebettete Videos laden Tracker von doubleclick.net, auch wenn das Video noch nicht abgespielt wurde.',
-          severity: 'Medium',
-          recommendation: 'Nutzen Sie den "erweiterten Datenschutzmodus" (youtube-nocookie.com) oder binden Sie Videos erst nach Einwilligung ein.',
-          impact: 'Zusätzliche Tracking-Cookies von Google.',
-          solution: {
-            steps: [
-              'Gehen Sie beim YouTube Video auf "Teilen" -> "Einbetten".',
-              'Aktivieren Sie die Option "Erweiterten Datenschutzmodus aktivieren".',
-              'Prüfen Sie, ob die URL nun `youtube-nocookie.com` enthält.',
-              'Ersetzen Sie den alten Iframe-Code auf Ihrer Webseite.'
-            ],
-            code: '<iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" ...></iframe>',
-            tip: 'Für maximale Sicherheit nutzen Sie eine "Zwei-Klick-Lösung", die erst ein Vorschaubild anzeigt.'
-          }
-        });
-        score -= 10;
-      }
-
-      if (detectedFindings.length === 0) {
-        score = 98;
-      }
-
-      const finalData = {
-        url: currentWebsite.url,
-        client_name: currentWebsite.client_name,
-        date: new Date().toLocaleDateString('de-DE'),
-        score: score,
-        status: score < 50 ? 'Kritisch' : score < 85 ? 'Warnung' : 'Sicher'
-      };
-      
-      setScanData(finalData);
-      setFindings(detectedFindings);
-
-      // AUTO-SAVE to ensure score appears in list immediately
-      const savedScans = JSON.parse(sessionStorage.getItem('dashboard-scans') || '[]');
-      const newScanHistoryEntry = {
-        id: params.id,
-        name: finalData.client_name,
-        url: finalData.url,
-        date: finalData.date,
-        status: finalData.status,
-        violations: detectedFindings.length,
-        score: finalData.score,
-        risk: finalData.score < 50 ? 'high' : finalData.score < 85 ? 'warning' : 'safe'
-      };
-      const filteredScans = savedScans.filter((s: any) => s.id !== params.id);
-      sessionStorage.setItem('dashboard-scans', JSON.stringify([newScanHistoryEntry, ...filteredScans]));
-      
-    } catch (err) {
-      console.error('Scan analysis failed:', err);
-    } finally {
-      setLoading(false);
     }
-  };
 
-    performScan();
+    loadScanData();
   }, [params.id]);
 
-  const handleSaveReport = () => {
-    // Persistent saving in mocked mode
-    const savedScans = JSON.parse(sessionStorage.getItem('dashboard-scans') || '[]');
-    
-    // Add current scan to history
-    const newScanEntry = {
-      id: params.id,
-      name: scanData?.client_name,
-      url: scanData?.url,
-      date: scanData?.date,
-      status: scanData?.status,
-      violations: findings.length,
-      score: scanData?.score,
-      risk: (scanData?.score ?? 0) < 50 ? 'high' : (scanData?.score ?? 0) < 85 ? 'warning' : 'safe'
-    };
 
-    // Prevent duplicates
-    const filteredScans = savedScans.filter((s: any) => s.id !== params.id);
-    sessionStorage.setItem('dashboard-scans', JSON.stringify([newScanEntry, ...filteredScans]));
-    
-    alert('Bericht erfolgreich im Dashboard gespeichert! ✅');
-  };
+
+
+
 
   const handleShareReport = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -337,6 +235,14 @@ export default function ScanResultPage() {
         </div>
       )}
 
+      {/* Prototype Warning Notice */}
+      <div className="no-print bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3 text-amber-800">
+        <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+        <p className="text-sm font-medium">
+          <span className="font-bold">Hinweis:</span> Dies ist ein Prototyp. Die Analyse basiert momentan auf vordefinierten Mustern und dient der Demonstration des User Interface. Eine vollständige technische Prüfung erfolgt in der finalen Version.
+        </p>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div className="flex items-center gap-4">
@@ -355,10 +261,6 @@ export default function ScanResultPage() {
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="font-bold gap-2 no-print" onClick={handleSaveReport}>
-            <ShieldCheck className="h-4 w-4" />
-            Speichern
-          </Button>
           <Button variant="outline" className="font-bold gap-2 no-print" onClick={() => window.print()}>
             <Download className="h-4 w-4" />
             PDF Export
@@ -550,7 +452,8 @@ export default function ScanResultPage() {
           <div className="space-y-1 flex-1">
             <p className="text-sm font-bold text-slate-900">Haftungsausschluss</p>
             <p className="text-xs text-slate-500 font-medium leading-relaxed">
-              Этот отчет был создан автоматически и служит для первоначальной ориентации. 
+              Dieser Bericht wurde automatisiert erstellt und dient der ersten Orientierung. 
+              Er ersetzt keine Rechtsberatung durch einen qualifizierten Rechtsanwalt oder Datenschutzbeauftragten.
               {branding.report_footer && <span className="block mt-1 font-bold italic text-slate-700">{branding.report_footer}</span>}
             </p>
           </div>

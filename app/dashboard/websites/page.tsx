@@ -118,19 +118,23 @@ export default function WebsitesPage() {
       return;
     }
 
+    setScanningId(websiteId);
     try {
-      const { error: scanError } = await supabase.from('scans').insert({
-        website_id: websiteId,
-        status: 'pending',
-        violations_count: 0,
-        risk_score: 0
+      const response = await fetch('/api/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ websiteId })
       });
 
-      if (scanError) throw scanError;
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
 
-      alert('Scan wurde gestartet! (In Produktion würde hier ein Backend-Worker starten)');
-    } catch (err) {
+      router.push(`/dashboard/scans/${result.scanId}`);
+    } catch (err: any) {
       console.error('Scan failed:', err);
+      alert('Scan fehlgeschlagen: ' + err.message);
+    } finally {
+      setScanningId(null);
     }
   };
 
