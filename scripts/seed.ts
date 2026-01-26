@@ -84,29 +84,34 @@ async function seed() {
     },
   ];
 
-  for (const site of websites) {
-    const { data: siteData, error: siteError } = await supabase
-      .from('websites')
-      .insert(site)
-      .select()
-      .single();
+  const { data: insertedSites, error: sitesError } = await supabase
+    .from('websites')
+    .insert(websites)
+    .select();
 
-    if (siteError) {
-      console.error(`Error creating website ${site.domain}:`, siteError.message);
-      continue;
-    }
+  if (sitesError) {
+    console.error('Error creating websites:', sitesError.message);
+    return;
+  }
 
-    // 4. Create Scans for this website
-    console.log(`Creating scans for ${site.domain}...`);
-    
-    // Create a "completed" scan
-    await supabase.from('scans').insert({
-      website_id: siteData.id,
+  if (insertedSites && insertedSites.length > 0) {
+    console.log(`Created ${insertedSites.length} websites. Generating scans...`);
+
+    const scans = insertedSites.map((site) => ({
+      website_id: site.id,
       status: 'completed',
       violations_count: site.status === 'error' ? 3 : 0,
       risk_score: site.status === 'error' ? 85 : 10,
       created_at: new Date().toISOString(),
-    });
+    }));
+
+    const { error: scansError } = await supabase.from('scans').insert(scans);
+
+    if (scansError) {
+      console.error('Error creating scans:', scansError.message);
+    } else {
+      console.log(`Created ${scans.length} scans.`);
+    }
   }
 
   console.log('✅ Seed completed successfully!');
