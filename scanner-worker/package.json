@@ -1,0 +1,14 @@
+{
+  "name": "dsgvo-scanner-worker",
+  "version": "1.0.0",
+  "description": "Puppeteer worker for DSGVO Scanner",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^16.3.1",
+    "puppeteer": "^21.5.2"
+  }
+}
