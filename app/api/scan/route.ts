@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
+import { analyzeWebsite } from '@/lib/scan-engine';
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,50 +44,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to create scan record' }, { status: 500 });
     }
 
-    // 4. PERFORM SCAN (PROTOTYPE LOGIC)
-    // In a real implementation, this would trigger a background job or use Puppeteer
-    const url = website.url.toLowerCase();
-    const detectedFindings = [];
-    let score = 100;
-
-    // Google Fonts
-    if (url.includes('google') || url.includes('fonts.googleapis.com')) {
-      detectedFindings.push({
-        category: 'Drittanbieter & CDNs',
-        title: 'Google Fonts (Remote)',
-        status: 'violation',
-        severity: 'high',
-        description_de: 'Schriftarten werden direkt von Google-Servern geladen.',
-        recommendation_de: 'Laden Sie die Schriftarten herunter und hosten Sie diese lokal.'
-      });
-      score -= 15;
+    // 4. PERFORM REAL SCAN
+    let scanResult;
+    try {
+      scanResult = await analyzeWebsite(website.url);
+    } catch (scanError: any) {
+      console.error('Core Scan Error:', scanError);
+      await supabase
+        .from('scans')
+        .update({ 
+          status: 'failed', 
+          error_log: scanError.message || 'Analysis failed' 
+        })
+        .eq('id', scan.id);
+      
+      return NextResponse.json({ error: 'Analysis failed: ' + scanError.message }, { status: 500 });
     }
 
-    // GTM
-    if (url.includes('googletagmanager')) {
-      detectedFindings.push({
-        category: 'Tracking & Analytics',
-        title: 'Google Tag Manager',
-        status: 'violation',
-        severity: 'high',
-        description_de: 'GTM wird ohne Einwilligung geladen.',
-        recommendation_de: 'Konfigurieren Sie GTM mit einer CMP.'
-      });
-      score -= 20;
-    }
-
-    if (detectedFindings.length === 0) {
-      score = 98;
-    }
-
-    // 5. Update scan record
+    // 5. Update scan record with results
     const { error: updateError } = await supabase
       .from('scans')
       .update({
         status: 'completed',
-        violations_count: detectedFindings.length,
-        risk_score: score,
-        results: { findings: detectedFindings },
+        violations_count: scanResult.findings.length,
+        risk_score: scanResult.score,
+        results: { findings: scanResult.findings },
         completed_at: new Date().toISOString()
       })
       .eq('id', scan.id);
@@ -103,8 +85,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       scanId: scan.id,
-      score,
-      violations: detectedFindings.length
+      score: scanResult.score,
+      violations: scanResult.findings.length
     });
 
   } catch (error) {
