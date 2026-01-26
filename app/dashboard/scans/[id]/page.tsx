@@ -221,7 +221,7 @@ export default function ScanResultPage() {
                  </div>
                  <div>
                     <p className="text-sm font-bold text-amber-900">Pro-Tipp vom DSB</p>
-                    <p className="text-sm text-amber-700 font-medium italic mt-1 leading-relaxed">"{selectedSolution.solution.tip}"</p>
+                    <p className="text-sm text-amber-700 font-medium italic mt-1 leading-relaxed">&quot;{selectedSolution.solution.tip}&quot;</p>
                  </div>
               </div>
               
@@ -422,7 +422,7 @@ export default function ScanResultPage() {
                         <div className="space-y-4">
                           <div>
                             <p className="text-xs font-black text-slate-900 uppercase tracking-tighter mb-2">Empfohlene Maßnahme</p>
-                            <p className="text-sm text-slate-600 font-medium leading-relaxed italic">"{finding.recommendation}"</p>
+                            <p className="text-sm text-slate-600 font-medium leading-relaxed italic">&quot;{finding.recommendation}&quot;</p>
                           </div>
                           <Button 
                             variant="outline" 
