@@ -175,8 +175,9 @@ export default function WebsitesPage() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Website URL</label>
+                  <label htmlFor="website-url" className="text-sm font-bold text-slate-700">Website URL</label>
                   <Input
+                    id="website-url"
                     type="url"
                     placeholder="https://example.com"
                     value={formData.url}
@@ -187,8 +188,9 @@ export default function WebsitesPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Mandantenname</label>
+                  <label htmlFor="client-name" className="text-sm font-bold text-slate-700">Mandantenname</label>
                   <Input
+                    id="client-name"
                     type="text"
                     placeholder="Mustermann GmbH"
                     value={formData.client_name}
@@ -330,6 +332,7 @@ export default function WebsitesPage() {
                           handleDelete(website.id);
                         }}
                         className="text-slate-300 hover:text-red-600 hover:bg-red-50 transition-all h-10 w-10 p-0"
+                        aria-label="Website löschen"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
