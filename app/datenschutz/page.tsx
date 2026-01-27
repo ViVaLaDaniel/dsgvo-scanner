@@ -37,17 +37,16 @@ export default function DatenschutzPage() {
             </section>
 
             <section>
-              <h3 className="text-xl font-bold text-slate-900 mb-4">2. Hosting und Content Delivery Networks (CDN)</h3>
+              <h3 className="text-xl font-bold text-slate-900 mb-4">2. Hosting und Server</h3>
               <p className="text-slate-600 leading-relaxed">
-                Wir hosten die Inhalte unserer Website bei folgendem Anbieter:
+                Unsere Server befinden sich ausschließlich in Deutschland (Region Frankfurt, Vercel/Supabase), что гарантирует высочайший уровень защиты данных.
               </p>
-              <p className="text-slate-600 font-bold">Vercel</p>
-              <p className="text-slate-600 leading-relaxed">
-                Anbieter ist die Vercel Inc., 440 N Barranca Ave #4133 Covina, CA 91723, USA. Details entnehmen Sie der Datenschutzerklärung von Vercel: 
-                <a href="https://vercel.com/legal/privacy" className="text-blue-600 hover:underline ml-1" target="_blank" rel="noopener noreferrer">
-                  https://vercel.com/legal/privacy
-                </a>.
-              </p>
+              <p className="text-slate-600 font-bold mt-4">Genutzte Dienste (Sub-processors):</p>
+              <ul className="list-disc list-inside text-slate-600 space-y-1">
+                <li><strong>Vercel</strong> (Hosting & Edge Network)</li>
+                <li><strong>Supabase</strong> (Database - Region Frankfurt/EU)</li>
+                <li><strong>Paddle</strong> (Merchant of Record & Payments)</li>
+              </ul>
             </section>
 
             <section>

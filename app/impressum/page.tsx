@@ -31,36 +31,43 @@ export default function ImpressumPage() {
             <section>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Angaben gemäß § 5 TMG</h3>
               <p className="text-slate-600">
-                Germani Project / DSGVO Scanner<br />
-                Musterstraße 123<br />
-                12345 Musterstadt
+                Zamyatin Daniel Sergeevich<br />
+                C. las Gitanillas, 13<br />
+                29670 Marbella, Málaga, Spanien
               </p>
             </section>
 
             <section>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Vertreten durch</h3>
-              <p className="text-slate-600">Daniel Mustername</p>
+              <p className="text-slate-600">Zamyatin Daniel Sergeevich</p>
             </section>
 
             <section>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Kontakt</h3>
               <p className="text-slate-600">
-                Telefon: +49 (0) 123 456789<br />
-                E-Mail: support@dsgvo-scanner.de
+                Telefon: +34 642 370 671<br />
+                E-Mail: zamyatin.daniel@gmail.com
               </p>
             </section>
 
             <section>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Umsatzsteuer-ID</h3>
               <p className="text-slate-600">
-                Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br />
-                DE 123 456 789
+                Umsatzsteuer-Identifikationsnummer (NIF):<br />
+                Folgt (via Paddle)
+              </p>
+            </section>
+
+            <section>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">Wichtiger Hinweis (B2B)</h3>
+              <p className="text-slate-600 font-bold">
+                Dieses Angebot richtet sich ausschließlich an Gewerbetreibende (§14 BGB). Kein Verkauf an Verbraucher.
               </p>
             </section>
 
             <section>
               <h3 className="text-lg font-bold text-slate-900 mb-2">Redaktionell verantwortlich</h3>
-              <p className="text-slate-600">Daniel Mustername</p>
+              <p className="text-slate-600">Zamyatin Daniel Sergeevich</p>
             </section>
 
             <section>
