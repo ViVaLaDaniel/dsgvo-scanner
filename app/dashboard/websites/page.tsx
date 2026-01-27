@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { Dialog } from '@/components/ui/dialog';
 
 const websiteSchema = z.object({
   url: z.string().url({ message: 'Ungültige URL. Bitte mit http:// oder https:// eingeben.' }),
@@ -164,59 +165,54 @@ export default function WebsitesPage() {
         </Button>
       </div>
 
-      {/* Add Website Form */}
-      {showAddForm && (
-        <Card className="border-blue-100 bg-blue-50/30 shadow-xl shadow-blue-500/5 animate-in slide-in-from-top-4 duration-300">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold">Neue Website hinzufügen</CardTitle>
-            <CardDescription className="font-medium">
-              Fügen Sie die URL и den Mandantennamen hinzu
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {error && (
-                <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive">
-                  <AlertDescription className="font-bold">{error}</AlertDescription>
-                </Alert>
-              )}
+      {/* Add Website Dialog */}
+      <Dialog
+        isOpen={showAddForm}
+        onClose={() => setShowAddForm(false)}
+        title="Neue Website hinzufügen"
+        description="Fügen Sie die URL и den Mandantennamen hinzu"
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {error && (
+            <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive">
+              <AlertDescription className="font-bold">{error}</AlertDescription>
+            </Alert>
+          )}
 
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Website URL</label>
-                  <Input
-                    {...register('url')}
-                    type="url"
-                    placeholder="https://example.com"
-                    className={cn("bg-white border-slate-200 focus:ring-blue-500/20", errors.url && "border-red-500")}
-                  />
-                  {errors.url && <p className="text-red-500 text-[10px] font-bold">{errors.url.message}</p>}
-                </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700">Website URL</label>
+              <Input
+                {...register('url')}
+                type="url"
+                placeholder="https://example.com"
+                className={cn("bg-white border-slate-200 focus:ring-blue-500/20", errors.url && "border-red-500")}
+              />
+              {errors.url && <p className="text-red-500 text-[10px] font-bold">{errors.url.message}</p>}
+            </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Mandantenname</label>
-                  <Input
-                    {...register('client_name')}
-                    type="text"
-                    placeholder="Mustermann GmbH"
-                    className={cn("bg-white border-slate-200 focus:ring-blue-500/20", errors.client_name && "border-red-500")}
-                  />
-                  {errors.client_name && <p className="text-red-500 text-[10px] font-bold">{errors.client_name.message}</p>}
-                </div>
-              </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700">Mandantenname</label>
+              <Input
+                {...register('client_name')}
+                type="text"
+                placeholder="Mustermann GmbH"
+                className={cn("bg-white border-slate-200 focus:ring-blue-500/20", errors.client_name && "border-red-500")}
+              />
+              {errors.client_name && <p className="text-red-500 text-[10px] font-bold">{errors.client_name.message}</p>}
+            </div>
+          </div>
 
-              <div className="flex gap-3 pt-2">
-                <Button type="submit" disabled={isSubmitting} className="font-bold px-8 shadow-lg shadow-blue-500/20">
-                  {isSubmitting ? 'Wird hinzugefügt...' : 'Hinzufügen'}
-                </Button>
-                <Button type="button" variant="outline" onClick={() => setShowAddForm(false)} className="font-bold border-slate-200">
-                  Abbrechen
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+          <div className="flex gap-3 pt-4">
+            <Button type="submit" disabled={isSubmitting} className="flex-1 font-bold shadow-lg shadow-blue-500/20">
+              {isSubmitting ? 'Wird hinzugefügt...' : 'Hinzufügen'}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setShowAddForm(false)} className="flex-1 font-bold border-slate-200">
+              Abbrechen
+            </Button>
+          </div>
+        </form>
+      </Dialog>
 
       {/* Websites List */}
       <div className="grid gap-6 md:grid-cols-1 overflow-hidden">

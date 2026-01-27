@@ -66,7 +66,6 @@ export default function DashboardLayout({
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-xl font-bold text-slate-900 tracking-tight text-nowrap">DSGVO<span className="text-blue-600 font-extrabold">Scan</span></span>
-            <span className="px-1.5 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[8px] font-black uppercase tracking-tighter">Beta</span>
           </div>
         </div>
 
@@ -127,11 +126,6 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <div className="flex-1 lg:pl-64 flex flex-col min-h-screen">
-        {/* Beta Banner */}
-        <div className="bg-slate-900 text-white text-[10px] py-1.5 px-6 text-center font-bold uppercase tracking-[0.2em]">
-          🚀 Sie nutzen die <span className="text-blue-400">Beta-Version</span> 1.0.1 • Feedback willkommen
-        </div>
-
         {/* Top Header */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white/80 backdrop-blur-md px-6 lg:px-8">
           <div className="lg:hidden flex items-center gap-2">
@@ -140,7 +134,6 @@ export default function DashboardLayout({
             </div>
             <h1 className="text-lg font-bold text-slate-900 flex items-center gap-1.5">
                DSGVO Scan
-               <span className="px-1 py-0.5 rounded bg-blue-100 text-blue-700 text-[8px] font-black uppercase tracking-tighter">Beta</span>
             </h1>
           </div>
           <div className="hidden lg:block text-slate-400 text-xs font-bold uppercase tracking-widest">
