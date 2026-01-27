@@ -151,6 +151,7 @@ export default function DashboardLayout({
             <button 
               onClick={() => alert('Sie haben aktuell keine neuen Benachrichtigungen. ✨')}
               className="relative rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all group"
+              aria-label="Benachrichtigungen anzeigen"
             >
               <Bell className="h-5 w-5" />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-blue-600 ring-2 ring-white" />
