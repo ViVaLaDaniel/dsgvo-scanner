@@ -1,26 +1,52 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { analyzeWebsite } from '@/lib/scan-engine';
+import { chromium } from 'playwright-core';
 
-// Mock global fetch
-global.fetch = vi.fn();
+// Mock playwright-core
+vi.mock('playwright-core', () => ({
+  chromium: {
+    launch: vi.fn()
+  }
+}));
 
 describe('Scan Engine (Unit)', () => {
+  let mockRequestCallback: (request: any) => void;
+  let mockPage: any;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    
+    // Setup mock page and browser
+    mockPage = {
+      on: vi.fn((event, callback) => {
+        if (event === 'request') mockRequestCallback = callback;
+      }),
+      goto: vi.fn().mockResolvedValue({}),
+      evaluate: vi.fn().mockResolvedValue({}),
+      waitForTimeout: vi.fn().mockResolvedValue({}),
+      close: vi.fn().mockResolvedValue({}),
+    };
+
+    const mockContext = {
+      newPage: vi.fn().mockResolvedValue(mockPage),
+      cookies: vi.fn().mockResolvedValue([]),
+      close: vi.fn().mockResolvedValue({}),
+    };
+
+    const mockBrowser = {
+      newContext: vi.fn().mockResolvedValue(mockContext),
+      close: vi.fn().mockResolvedValue({}),
+    };
+
+    (chromium.launch as any).mockResolvedValue(mockBrowser);
   });
 
   it('should detect Google Fonts violation', async () => {
-    const mockHtml = `
-      <html>
-        <head>
-          <link href="https://fonts.googleapis.com/css2?family=Roboto" rel="stylesheet">
-        </head>
-      </html>
-    `;
-
-    (global.fetch as any).mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve(mockHtml),
+    // Setup: trigger request during goto
+    mockPage.goto.mockImplementation(async () => {
+      if (mockRequestCallback) {
+        mockRequestCallback({ url: () => 'https://fonts.googleapis.com/css?family=Roboto' });
+      }
     });
 
     const result = await analyzeWebsite('https://example.com');
@@ -30,13 +56,10 @@ describe('Scan Engine (Unit)', () => {
   });
 
   it('should detect Google Tag Manager violation', async () => {
-    const mockHtml = `
-      <script src="https://www.googletagmanager.com/gtm.js?id=GTM-XXXX"></script>
-    `;
-
-    (global.fetch as any).mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve(mockHtml),
+    mockPage.goto.mockImplementation(async () => {
+      if (mockRequestCallback) {
+        mockRequestCallback({ url: () => 'https://www.googletagmanager.com/gtm.js?id=GTM-XXXX' });
+      }
     });
 
     const result = await analyzeWebsite('https://example.com');
@@ -45,25 +68,15 @@ describe('Scan Engine (Unit)', () => {
   });
 
   it('should return a high score for a clean website', async () => {
-    const mockHtml = `<html><body><h1>Clean Site</h1></body></html>`;
-
-    (global.fetch as any).mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve(mockHtml),
-    });
-
     const result = await analyzeWebsite('https://example.com');
 
-    expect(result.score).toBe(98); // Our scan engine defaults to 98 for clean sites
+    expect(result.score).toBe(98); 
     expect(result.findings.length).toBe(0);
   });
 
-  it('should throw error if website fetch fails', async () => {
-    (global.fetch as any).mockResolvedValue({
-      ok: false,
-      statusText: 'Not Found',
-    });
+  it('should throw error if browser fails to load page', async () => {
+    mockPage.goto.mockRejectedValue(new Error('Page load failed'));
 
-    await expect(analyzeWebsite('https://404-site.com')).rejects.toThrow('Cloud not fetch website: Not Found');
+    await expect(analyzeWebsite('https://fail-site.com')).rejects.toThrow('Page load failed');
   });
 });

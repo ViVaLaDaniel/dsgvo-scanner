@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { Website, Scan } from '@/types/supabase';
 import Link from 'next/link';
+import { DownloadReportButton } from '@/components/reporting/DownloadReportButton';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -178,7 +179,8 @@ export default function DashboardPage() {
                       <th className="pb-4 font-bold">Mandant / URL</th>
                       <th className="pb-4 font-bold">Datum</th>
                       <th className="pb-4 font-bold">Status</th>
-                      <th className="pb-4 font-bold text-right">Fundstellen</th>
+                      <th className="pb-4 font-bold text-center">Fundstellen</th>
+                      <th className="pb-4 font-bold text-right">PDF</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -208,11 +210,14 @@ export default function DashboardPage() {
                             {item.status}
                           </span>
                         </td>
-                        <td className="py-4 text-right">
+                        <td className="py-4 text-center" onClick={() => item.id && router.push(`/dashboard/scans/${item.id}`)}>
                           <span className={cn(
                             "font-black text-lg",
                             item.violations > 0 ? "text-slate-900" : "text-green-600"
                           )}>{item.violations}</span>
+                        </td>
+                        <td className="py-4 text-right">
+                          <DownloadReportButton scanId={item.id} variant="ghost" className="h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50" />
                         </td>
                       </tr>
                     ))}
