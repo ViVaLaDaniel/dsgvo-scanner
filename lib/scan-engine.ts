@@ -1,3 +1,5 @@
+import { chromium } from 'playwright-core';
+
 /**
  * Core Scanning Engine Utility (MVP)
  * Detects common privacy violations by analyzing HTML source code.
@@ -39,7 +41,7 @@ export const SCAN_PATTERNS = {
       title: 'Google Tag Manager',
       status: 'violation',
       severity: 'high',
-      description_de: 'GTM wird ohne vorherige Einwilligung des Nutzers geladen.',
+      description_de: 'GTM wird без vorherige Einwilligung des Nutzers geladen.',
       recommendation_de: 'Stellen Sie sicher, dass das GTM-Skript erst nach der Einwilligung im Cookie-Banner gefeuert wird.',
       impact_de: 'Verstoß gegen TDDDG & DSGVO.'
     }
@@ -64,7 +66,7 @@ export const SCAN_PATTERNS = {
       status: 'warning',
       severity: 'medium',
       description_de: 'Eingebettete Videos laden Tracker von Google (doubleclick.net) bereits beim Seitenaufruf.',
-      recommendation_de: 'Nutzen Sie youtube-nocookie.com oder implementieren Sie eine Zwei-Kлик-Lösung.',
+      recommendation_de: 'Nutzen Sie youtube-nocookie.com oder implementieren Sie eine Zwei-Klick-Lösung.',
       impact_de: 'Unerwünschte Cookie-Setzung vor Abspielen des Videos.'
     }
   },
@@ -85,46 +87,94 @@ export const SCAN_PATTERNS = {
 export async function analyzeWebsite(url: string): Promise<ScanResult> {
   let score = 100;
   const findings: Finding[] = [];
+  const detectedUrls = new Set<string>();
 
+  let browser;
   try {
-    // 1. Fetch HTML content via server-side fetch
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Germani DSGVO Scanner/1.0 (Mozilla/5.0 Compliance Check)'
-      },
-      next: { revalidate: 0 }
+    // 1. Launch Browser
+    // Note: In production (Vercel), we might need an external browser endpoint
+    browser = await chromium.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
-    if (!response.ok) {
-      throw new Error(`Cloud not fetch website: ${response.statusText}`);
-    }
+    const context = await browser.newContext({
+      userAgent: 'Germani DSGVO Scanner/1.0 (Mozilla/5.0 Compliance Check)',
+      viewport: { width: 1280, height: 800 }
+    });
 
-    const html = await response.text();
+    const page = await context.newPage();
 
-    // 2. Perform pattern matching
-    for (const pattern of Object.values(SCAN_PATTERNS)) {
-      if (pattern.regex.test(html)) {
-        findings.push(pattern.finding as Finding);
-        
-        // Dynamic scoring
-        if (pattern.finding.severity === 'high') score -= 20;
-        else if (pattern.finding.severity === 'medium') score -= 10;
-        else score -= 5;
+    // 2. Network Interception
+    page.on('request', request => {
+      const requestUrl = request.url();
+      for (const [key, pattern] of Object.entries(SCAN_PATTERNS)) {
+        if (pattern.regex.test(requestUrl) && !detectedUrls.has(key)) {
+          detectedUrls.add(key);
+          findings.push({ 
+            ...pattern.finding,
+            technical_details: { url: requestUrl }
+          } as Finding);
+        }
       }
+    });
+
+    // 3. Navigate and Wait
+    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+
+    // 4. Auto-Scroll to trigger lazy-loaded requests
+    await page.evaluate(async () => {
+      await new Promise<void>((resolve) => {
+        let totalHeight = 0;
+        const distance = 100;
+        const timer = setInterval(() => {
+          const scrollHeight = document.body.scrollHeight;
+          window.scrollBy(0, distance);
+          totalHeight += distance;
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 100);
+      });
+    });
+
+    // Wait a bit more for dynamic requests after scroll
+    await page.waitForTimeout(2000);
+
+    // 5. ANALYZE COOKIES & STORAGE
+    const cookies = await context.cookies();
+    const localStorageData = await page.evaluate(() => JSON.stringify(window.localStorage));
+    
+    // Simple check: if cookies exist without a consent action being simulated, it's a potential warning
+    if (cookies.length > 0) {
+      findings.push({
+        category: 'Cookies',
+        title: 'Cookies обнаружены до согласия',
+        status: 'warning',
+        severity: 'medium',
+        description_de: `На сайте обнаружено ${cookies.length} куки до того, как пользователь дал согласие.`,
+        recommendation_de: 'Убедитесь, что все нетехнические куки блокируются до получения явного согласия через баннер.',
+        technical_details: { count: cookies.length, names: cookies.map(c => c.name) }
+      } as Finding);
     }
 
-    // 3. Ensure score doesn't go below 0
-    score = Math.max(0, score);
-    
-    // Default score if nothing found but not perfect
-    if (findings.length === 0 && score === 100) {
-      score = 98; // Minor things like headers usually missing
+    // 6. Scoring logic
+    for (const finding of findings) {
+      if (finding.severity === 'high') score -= 20;
+      else if (finding.severity === 'medium') score -= 10;
+      else score -= 5;
     }
+
+    score = Math.max(0, score);
+    if (findings.length === 0 && score === 100) score = 98;
 
     return { score, findings };
 
   } catch (error) {
-    console.error('Scan Engine Error:', error);
+    console.error('Playwright Scan Error:', error);
     throw error;
+  } finally {
+    if (browser) await browser.close();
   }
 }
