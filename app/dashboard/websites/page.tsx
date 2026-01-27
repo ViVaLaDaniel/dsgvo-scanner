@@ -11,15 +11,30 @@ import { createClient } from '@/lib/supabase/client';
 import { Website, UserProfile } from '@/types/supabase';
 import { Plus, Globe, Trash2, Play, ExternalLink, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+
+const websiteSchema = z.object({
+  url: z.string().url({ message: 'Ungültige URL. Bitte mit http:// oder https:// eingeben.' }),
+  client_name: z.string().min(2, { message: 'Mandantename muss mindestens 2 Zeichen lang sein.' }).max(100)
+});
+
+type WebsiteFormValues = z.infer<typeof websiteSchema>;
 
 export default function WebsitesPage() {
   const [websites, setWebsites] = useState<Website[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [formData, setFormData] = useState({
-    url: '',
-    client_name: ''
+  
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<WebsiteFormValues>({
+    resolver: zodResolver(websiteSchema),
+    defaultValues: {
+      url: '',
+      client_name: ''
+    }
   });
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [scanningId, setScanningId] = useState<string | null>(null);
@@ -52,33 +67,28 @@ export default function WebsitesPage() {
       .order('created_at', { ascending: false });
 
     if (websitesData) setWebsites(websitesData);
-    // Load real scans too if production
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (values: WebsiteFormValues) => {
     setError('');
-    setLoading(true);
-
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !profile) return;
 
     // Check limit
     if (websites.length >= profile.website_limit) {
       setError(`Sie haben Ihr Limit von ${profile.website_limit} Websites erreicht. Upgraden Sie Ihren Plan.`);
-      setLoading(false);
       return;
     }
 
     try {
       // Extract domain from URL
-      const url = new URL(formData.url);
+      const url = new URL(values.url);
       const domain = url.hostname;
 
       const { error: insertError } = await supabase.from('websites').insert({
-        url: formData.url,
+        url: values.url,
         domain: domain,
-        client_name: formData.client_name,
+        client_name: values.client_name,
         owner_id: user.id,
         scan_frequency: 'weekly',
         status: 'active'
@@ -86,13 +96,11 @@ export default function WebsitesPage() {
 
       if (insertError) throw insertError;
 
-      setFormData({ url: '', client_name: '' });
+      reset();
       setShowAddForm(false);
       loadData();
     } catch (err: any) {
       setError(err.message || 'Fehler beim Hinzufügen');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -166,7 +174,7 @@ export default function WebsitesPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               {error && (
                 <Alert variant="destructive" className="bg-destructive/5 border-destructive/20 text-destructive">
                   <AlertDescription className="font-bold">{error}</AlertDescription>
@@ -177,31 +185,29 @@ export default function WebsitesPage() {
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700">Website URL</label>
                   <Input
+                    {...register('url')}
                     type="url"
                     placeholder="https://example.com"
-                    value={formData.url}
-                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                    required
-                    className="bg-white border-slate-200 focus:ring-blue-500/20"
+                    className={cn("bg-white border-slate-200 focus:ring-blue-500/20", errors.url && "border-red-500")}
                   />
+                  {errors.url && <p className="text-red-500 text-[10px] font-bold">{errors.url.message}</p>}
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700">Mandantenname</label>
                   <Input
+                    {...register('client_name')}
                     type="text"
                     placeholder="Mustermann GmbH"
-                    value={formData.client_name}
-                    onChange={(e) => setFormData({ ...formData, client_name: e.target.value })}
-                    required
-                    className="bg-white border-slate-200 focus:ring-blue-500/20"
+                    className={cn("bg-white border-slate-200 focus:ring-blue-500/20", errors.client_name && "border-red-500")}
                   />
+                  {errors.client_name && <p className="text-red-500 text-[10px] font-bold">{errors.client_name.message}</p>}
                 </div>
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Button type="submit" disabled={loading} className="font-bold px-8 shadow-lg shadow-blue-500/20">
-                  {loading ? 'Wird hinzugefügt...' : 'Hinzufügen'}
+                <Button type="submit" disabled={isSubmitting} className="font-bold px-8 shadow-lg shadow-blue-500/20">
+                  {isSubmitting ? 'Wird hinzugefügt...' : 'Hinzufügen'}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setShowAddForm(false)} className="font-bold border-slate-200">
                   Abbrechen
