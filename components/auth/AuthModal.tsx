@@ -18,17 +18,26 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalProps) {
   const [view, setView] = React.useState<'login' | 'register'>(initialView);
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [isSubmitted, setIsSubmitted] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    email: '',
+    password: '',
+    name: '',
+    company: ''
+  });
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
   const router = useRouter();
   const supabase = createClient();
 
-  // Reset errors when switching views
+  // Sync initial view when modal re-opens
   React.useEffect(() => {
-    setError('');
-  }, [view]);
+    if (isOpen) {
+      setView(initialView);
+      setIsSubmitted(false);
+      setError('');
+    }
+  }, [isOpen, initialView]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,24 +47,22 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
     try {
       if (view === 'login') {
         const { error: loginError } = await supabase.auth.signInWithPassword({
-          email,
-          password
+          email: formData.email,
+          password: formData.password
         });
         if (loginError) throw loginError;
         router.refresh();
         onClose();
         router.push('/dashboard');
       } else {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          }
-        });
-        if (signUpError) throw signUpError;
-        alert('Registrierung erfolgreich! Bitte prüfen Sie Ihre E-Mails zur Bestätigung.');
-        setView('login');
+        // Registration Request Simulation
+        console.log('Registration Request:', formData);
+        setIsSubmitted(true);
+        setTimeout(() => {
+          setIsSubmitted(false);
+          onClose();
+          setView('login');
+        }, 4000);
       }
     } catch (err: any) {
       setError(err.message || 'Ein Fehler ist aufgetreten');
@@ -68,81 +75,145 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={view === 'login' ? 'Willkommen zurück' : 'Account erstellen'}
-      description={view === 'login' ? 'Melden Sie sich an, um Ihre Scans zu verwalten.' : 'Starten Sie noch heute mit Ihrem kostenlosen Monitoring.'}
+      title={isSubmitted ? "" : (view === 'login' ? 'Willkommen zurück' : 'Account anfragen')}
+      description={isSubmitted ? "" : (view === 'login' ? 'Melden Sie sich an, um Ihre Scans zu verwalten.' : 'Hinterlassen Sie Ihre Daten für den Zugang zur Testversion.')}
       className="max-w-md"
     >
       <div className="space-y-6 pt-2">
-        {/* View Switcher */}
-        <div className="flex p-1 bg-slate-100/50 rounded-xl">
-          <button
-            onClick={() => setView('login')}
-            className={cn(
-              "flex-1 py-2 text-sm font-bold rounded-lg transition-all",
-              view === 'login' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-            )}
-          >
-            Anmelden
-          </button>
-          <button
-            onClick={() => setView('register')}
-            className={cn(
-              "flex-1 py-2 text-sm font-bold rounded-lg transition-all",
-              view === 'register' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-            )}
-          >
-            Registrieren
-          </button>
-        </div>
+        {!isSubmitted && (
+          <div className="flex p-1 bg-slate-100/50 rounded-xl">
+            <button
+              onClick={() => setView('login')}
+              className={cn(
+                "flex-1 py-2 text-sm font-bold rounded-lg transition-all",
+                view === 'login' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              )}
+            >
+              Anmelden
+            </button>
+            <button
+              onClick={() => setView('register')}
+              className={cn(
+                "flex-1 py-2 text-sm font-bold rounded-lg transition-all",
+                view === 'register' ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
+              )}
+            >
+              Registrieren
+            </button>
+          </div>
+        )}
 
-        <form onSubmit={handleAuth} className="space-y-4">
-          {error && (
-            <Alert variant="destructive" className="bg-red-50 border-red-100 text-red-600">
-              <AlertDescription className="font-bold">{error}</AlertDescription>
-            </Alert>
+        <AnimatePresence mode="wait">
+          {isSubmitted ? (
+            <motion.div 
+              key="success"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="py-12 flex flex-col items-center text-center space-y-4"
+            >
+              <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <motion.div
+                  initial={{ rotate: -45, scale: 0 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ type: 'spring', delay: 0.2 }}
+                >
+                  <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </motion.div>
+              </div>
+              <h3 className="text-2xl font-black text-slate-900">Anfrage gesendet!</h3>
+              <p className="text-slate-500 font-medium max-w-xs">
+                Vielen Dank! Wir haben Ihre Daten erhalten и werden Ihnen die Zugangsdaten in Kürze per E-Mail zusenden.
+              </p>
+            </motion.div>
+          ) : (
+            <motion.form 
+              key={view}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              onSubmit={handleAuth} 
+              className="space-y-4"
+            >
+              {error && (
+                <Alert variant="destructive" className="bg-red-50 border-red-100 text-red-600">
+                  <AlertDescription className="font-bold">{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {view === 'register' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700">Vorname</label>
+                    <Input
+                      placeholder="Stefan"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      required
+                      className="bg-white/50 border-slate-200 focus:ring-blue-500/20 rounded-xl"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700">Unternehmen</label>
+                    <Input
+                      placeholder="Meier GmbH"
+                      value={formData.company}
+                      onChange={(e) => setFormData({...formData, company: e.target.value})}
+                      required
+                      className="bg-white/50 border-slate-200 focus:ring-blue-500/20 rounded-xl"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">E-Mail Adresse</label>
+                <Input
+                  type="email"
+                  placeholder="name@example.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  required
+                  className="bg-white/50 border-slate-200 focus:ring-blue-500/20 rounded-xl"
+                />
+              </div>
+
+              {view === 'login' && (
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Passwort</label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    required
+                    className="bg-white/50 border-slate-200 focus:ring-blue-500/20 rounded-xl"
+                  />
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full font-bold h-12 shadow-lg shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 rounded-xl mt-4"
+              >
+                {loading ? (
+                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  view === 'login' ? 'Anmelden' : 'Zugang anfordern'
+                )}
+              </Button>
+            </motion.form>
           )}
+        </AnimatePresence>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700">E-Mail Adresse</label>
-            <Input
-              type="email"
-              placeholder="name@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="bg-white/50 border-slate-200 focus:ring-blue-500/20"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700">Passwort</label>
-            <Input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="bg-white/50 border-slate-200 focus:ring-blue-500/20"
-            />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full font-bold h-12 shadow-lg shadow-blue-500/20 bg-blue-600 hover:bg-blue-700"
-          >
-            {loading ? (
-              <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              view === 'login' ? 'Anmelden' : 'Kostenlos registrieren'
-            )}
-          </Button>
-        </form>
-
-        <p className="text-center text-xs text-slate-400 font-medium">
-          Mit der Anmeldung akzeptieren Sie unsere <br />
-          <a href="/agb" className="text-blue-500 hover:underline">AGB</a> и <a href="/datenschutz" className="text-blue-500 hover:underline">Datenschutzerklärung</a>.
-        </p>
+        {!isSubmitted && (
+          <p className="text-center text-xs text-slate-400 font-medium">
+            Mit Absenden akzeptieren Sie unsere <br />
+            <a href="/agb" className="text-blue-500 hover:underline">AGB</a> и <a href="/datenschutz" className="text-blue-500 hover:underline">Datenschutzerklärung</a>.
+          </p>
+        )}
       </div>
     </Dialog>
   );

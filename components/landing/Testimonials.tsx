@@ -105,18 +105,12 @@ export function Testimonials() {
               <p className="text-slate-400 text-lg max-w-2xl mx-auto font-medium">
                 Schließen Sie sich den Profis an и sparen Sie noch heute bares Geld и wertvolle Lebenszeit. Keine Risiken, jederzeit kündbar.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                <button 
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                  className="px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 transition-all hover:-translate-y-1 active:scale-95"
-                >
-                  Kostenlos registrieren
-                </button>
+              <div className="flex justify-center pt-4">
                 <button 
                   onClick={() => setIsDemoOpen(true)}
-                  className="px-10 py-5 bg-white/10 hover:bg-white/20 text-white font-black rounded-2xl border border-white/10 backdrop-blur-md transition-all active:scale-95"
+                  className="px-12 py-6 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-2xl shadow-xl shadow-blue-500/20 transition-all hover:-translate-y-1 active:scale-95 text-lg"
                 >
-                  Demo buchen
+                  Kostenlos testen / Demo buchen
                 </button>
               </div>
             </div>
