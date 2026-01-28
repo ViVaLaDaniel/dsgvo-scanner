@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Globe, Trash2, Play, ExternalLink, ShieldCheck, ArrowRight, CheckCircle, Shield, Clock, AlertTriangle } from 'lucide-react';
+import { Plus, Globe, Trash2, Play, ExternalLink, ShieldCheck, ArrowRight, CheckCircle, Shield, Clock, AlertTriangle, Menu, X } from 'lucide-react';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useSmoothScroll } from '@/lib/hooks/useSmoothScroll';
 import { DashboardPreview } from '@/components/landing/DashboardPreview';
@@ -18,13 +18,20 @@ export default function HomePage() {
     isOpen: false,
     view: 'login'
   });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const openAuth = (view: 'login' | 'register') => {
     setAuthModal({ isOpen: true, view });
+    setMobileMenuOpen(false);
+  };
+
+  const handleScroll = (id: string) => {
+    scrollTo(id);
+    setMobileMenuOpen(false);
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 via-slate-50 to-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 via-slate-50 to-slate-100 flex flex-col overflow-x-hidden">
       <AuthModal 
         isOpen={authModal.isOpen} 
         onClose={() => setAuthModal(prev => ({ ...prev, isOpen: false }))} 
@@ -37,17 +44,19 @@ export default function HomePage() {
       
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/70 backdrop-blur-md transition-all">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center max-w-7xl">
-          <div className="flex items-center gap-2 group cursor-pointer">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center max-w-7xl relative z-50">
+          <div className="flex items-center gap-2 group cursor-pointer z-50">
             <div className="bg-blue-600 p-1.5 rounded-lg transition-transform group-hover:scale-110">
               <Shield className="h-6 w-6 text-white" />
             </div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900">
                 DSGVO<span className="text-blue-600">Scanner</span>
               </h1>
             </div>
           </div>
+
+          {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
             <button 
               onClick={() => scrollTo('features')} 
@@ -62,7 +71,9 @@ export default function HomePage() {
               Preise
             </button>
           </nav>
-          <div className="flex gap-4 items-center">
+
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex gap-4 items-center">
             <Button 
               variant="ghost" 
               onClick={() => openAuth('login')}
@@ -77,34 +88,78 @@ export default function HomePage() {
               Kostenlos Testen
             </Button>
           </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            className="md:hidden z-50 p-2 text-slate-600"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
+
+        {/* Mobile Fullscreen Menu */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 top-0 z-40 bg-white flex flex-col pt-24 px-6 gap-6 md:hidden animate-in slide-in-from-top-10 duration-200 h-screen w-screen overflow-y-auto">
+            <button
+              onClick={() => handleScroll('features')}
+              className="text-lg font-bold text-slate-900 hover:text-blue-600 text-left py-4 border-b border-slate-100"
+            >
+              Funktionen
+            </button>
+            <button
+              onClick={() => handleScroll('pricing')}
+              className="text-lg font-bold text-slate-900 hover:text-blue-600 text-left py-4 border-b border-slate-100"
+            >
+              Preise
+            </button>
+
+            <div className="mt-auto mb-8 flex flex-col gap-4 pb-12">
+               <Button
+                variant="outline"
+                size="lg"
+                onClick={() => openAuth('login')}
+                className="w-full font-bold text-slate-900 h-12"
+              >
+                Anmelden
+              </Button>
+              <Button
+                size="lg"
+                onClick={() => openAuth('register')}
+                className="w-full shadow-xl shadow-blue-500/20 font-bold bg-blue-600 h-12"
+              >
+                Kostenlos Testen
+              </Button>
+            </div>
+          </div>
+        )}
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 w-full overflow-hidden">
         {/* Hero Section */}
-        <section className="container mx-auto px-4 pt-24 pb-20 text-center max-w-5xl">
-          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-semibold mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-            <span className="relative flex h-2 w-2">
+        <section className="container mx-auto px-4 pt-12 md:pt-24 pb-16 md:pb-20 text-center max-w-5xl">
+          <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100 text-blue-700 px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold mb-6 md:mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 max-w-full overflow-hidden text-ellipsis whitespace-nowrap">
+            <span className="relative flex h-2 w-2 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
             </span>
             Neu: White-Label Reports für Agenturen
           </div>
-          <h2 className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-8 tracking-tight leading-[1.1]">
+          <h2 className="text-4xl md:text-7xl font-extrabold text-slate-900 mb-6 md:mb-8 tracking-tight leading-[1.1]">
             DSGVO-Monitoring für<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-              externe Datenschutzbeauftragte
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 block md:inline mt-2 md:mt-0">
+              externe DSBs
             </span>
           </h2>
-          <p className="text-xl md:text-2xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg md:text-2xl text-slate-600 mb-8 md:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
             Überwachen Sie automatisch 50+ Mandanten-Websites und erhalten Sie 
-            sofortige Benachrichtigungen bei DSGVO-Verstößen. Sparen Sie Zeit und minimieren Sie Haftungsrisiken.
+            sofortige Benachrichtigungen bei DSGVO-Verstößen.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4 w-full">
             <Button 
               size="lg" 
               onClick={() => openAuth('register')}
-              className="text-lg px-8 py-7 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 transition-all group"
+              className="w-full sm:w-auto text-lg px-8 py-7 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 transition-all group"
             >
               Jetzt testen (Dev Mode)
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -113,17 +168,17 @@ export default function HomePage() {
               size="lg" 
               variant="outline" 
               onClick={() => setIsDemoOpen(true)}
-              className="text-lg px-8 py-7 bg-white dark:bg-slate-950"
+              className="w-full sm:w-auto text-lg px-8 py-7 bg-white dark:bg-slate-950"
             >
               Demo ansehen
             </Button>
           </div>
 
-          <div className="mt-20">
+          <div className="mt-16 md:mt-20 px-2 md:px-0">
             <DashboardPreview />
           </div>
           
-          <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm font-medium text-slate-500">
+          <div className="mt-12 flex flex-col md:flex-row flex-wrap justify-center items-center gap-x-8 gap-y-4 text-sm font-medium text-slate-500">
             <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-green-500" /> Keine Kreditkarte erforderlich</span>
             <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-green-500" /> Jederzeit kündbar</span>
             <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-green-500" /> DSGVO compliant</span>
@@ -131,12 +186,13 @@ export default function HomePage() {
         </section>
 
         {/* Features */}
-        <section id="features" className="container mx-auto px-4 py-24 max-w-7xl">
-          <div className="text-center mb-16">
-            <h3 className="text-3xl font-bold text-slate-900 mb-4">Warum DSBs uns lieben</h3>
-            <p className="text-slate-600 max-w-2xl mx-auto">Unsere Plattform wurde speziell für die Bedürfnisse von Datenschutzbeauftragten entwickelt, die viele Mandanten gleichzeitig betreuen.</p>
+        <section id="features" className="container mx-auto px-4 py-16 md:py-24 max-w-7xl">
+          <div className="text-center mb-12 md:mb-16">
+            <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">Warum DSBs uns lieben</h3>
+            <p className="text-slate-600 max-w-2xl mx-auto px-4">Unsere Plattform wurde speziell für die Bedürfnisse von Datenschutzbeauftragten entwickelt.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-6 md:gap-8 px-2 md:px-0">
+            {/* Feature Cards - same content */}
             <Card className="hover:border-blue-200 transition-all hover:shadow-xl hover:-translate-y-1 duration-300">
               <CardHeader>
                 <div className="bg-blue-50 w-14 h-14 rounded-2xl flex items-center justify-center mb-6">
@@ -224,30 +280,33 @@ export default function HomePage() {
         </section>
 
         {/* Mid-Page CTA */}
-        <section className="bg-blue-600 py-12">
-          <div className="container mx-auto px-4 max-w-7xl flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="text-white space-y-2 text-center md:text-left">
-              <h3 className="text-2xl font-bold">Bereit, Zeit и Haftungsrisiken zu minimieren?</h3>
-              <p className="text-blue-100 font-medium opacity-90">Starten Sie jetzt mit Ihrer ersten Mandanten-Website — 100% kostenlos.</p>
+        <section className="bg-blue-600 py-12 md:py-16">
+          <div className="container mx-auto px-4 max-w-7xl flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+            <div className="text-white space-y-3 px-4 md:px-0">
+              <h3 className="text-2xl md:text-3xl font-bold">Bereit, Zeit und Risiken zu minimieren?</h3>
+              <p className="text-blue-100 font-medium opacity-90 max-w-lg">Starten Sie jetzt mit Ihrer ersten Mandanten-Website — 100% kostenlos.</p>
             </div>
-            <Button 
-              size="lg" 
-              onClick={() => openAuth('register')}
-              className="bg-white text-blue-600 hover:bg-white/90 font-black px-10 h-14 shadow-2xl shadow-blue-900/20"
-            >
-              Gratis Account erstellen
-            </Button>
+            <div className="px-4 w-full md:w-auto">
+              <Button
+                size="lg"
+                onClick={() => openAuth('register')}
+                className="w-full md:w-auto bg-white text-blue-600 hover:bg-white/90 font-black px-10 h-14 shadow-2xl shadow-blue-900/20 whitespace-nowrap"
+              >
+                Gratis Account erstellen
+              </Button>
+            </div>
           </div>
         </section>
 
         {/* Pricing */}
-        <section id="pricing" className="container mx-auto px-4 py-24 bg-slate-50 border-y border-slate-200">
+        <section id="pricing" className="container mx-auto px-4 py-16 md:py-24 bg-slate-50 border-y border-slate-200">
           <div className="max-w-7xl mx-auto">
-            <h3 className="text-4xl font-bold text-center mb-4 text-slate-900">Einfache Preise für DSB</h3>
-            <p className="text-center text-slate-600 mb-16 max-w-2xl mx-auto">Wählen Sie das passende Paket für Ihr Portfolio. Keine versteckten Kosten.</p>
+            <h3 className="text-3xl md:text-4xl font-bold text-center mb-4 text-slate-900">Einfache Preise für DSB</h3>
+            <p className="text-center text-slate-600 mb-12 md:mb-16 max-w-2xl mx-auto px-4">Wählen Sie das passende Paket für Ihr Portfolio.</p>
             
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              <Card className="flex flex-col h-full bg-white transition-all duration-300 hover:shadow-lg">
+            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto px-2 md:px-0">
+              {/* Pricing Cards */}
+              <Card className="flex flex-col h-full bg-white transition-all duration-300 hover:shadow-lg order-2 md:order-1">
                 <CardHeader>
                   <CardTitle className="text-lg font-bold">Starter</CardTitle>
                   <div className="flex items-baseline gap-1 mt-4">
@@ -284,8 +343,8 @@ export default function HomePage() {
                 </div>
               </Card>
 
-              <Card className="flex flex-col h-full border-blue-500 border-2 relative scale-105 shadow-2xl z-10 bg-white">
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+              <Card className="flex flex-col h-full border-blue-500 border-2 relative md:scale-105 shadow-2xl z-10 bg-white order-1 md:order-2">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap">
                   Beliebteste Wahl
                 </div>
                 <CardHeader>
@@ -327,7 +386,7 @@ export default function HomePage() {
                 </div>
               </Card>
 
-              <Card className="flex flex-col h-full bg-white transition-all duration-300 hover:shadow-lg">
+              <Card className="flex flex-col h-full bg-white transition-all duration-300 hover:shadow-lg order-3 md:order-3">
                 <CardHeader>
                   <CardTitle className="text-lg font-bold">Business</CardTitle>
                   <div className="flex items-baseline gap-1 mt-4">
@@ -371,7 +430,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t py-16">
+      <footer className="bg-white border-t py-12 md:py-16">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
             <div className="flex items-center gap-2">

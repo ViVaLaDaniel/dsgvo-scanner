@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Shield, LayoutDashboard, Globe, Settings, LogOut, Bell } from 'lucide-react';
+import { Shield, LayoutDashboard, Globe, Settings, LogOut, Bell, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
@@ -19,6 +19,7 @@ export default function DashboardLayout({
   const [supabase] = useState(() => createClient());
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [websiteCount, setWebsiteCount] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     async function loadProfile() {
@@ -56,17 +57,42 @@ export default function DashboardLayout({
     router.refresh();
   };
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
     <div className="flex min-h-screen bg-slate-50/50">
+      {/* Mobile Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="fixed left-0 top-0 hidden h-full w-64 border-r bg-white flex flex-col z-40 lg:flex text-slate-900">
-        <div className="flex h-16 items-center border-b px-6 gap-2">
-          <div className="bg-blue-600 p-1.5 rounded-lg shadow-lg shadow-blue-500/20">
-            <Shield className="h-5 w-5 text-white" />
+      <aside className={cn(
+        "fixed left-0 top-0 h-full w-64 border-r bg-white flex flex-col z-50 transition-transform duration-300 lg:translate-x-0 lg:static",
+        mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="flex h-16 items-center border-b px-6 gap-2 justify-between lg:justify-start">
+          <div className="flex items-center gap-2">
+            <div className="bg-blue-600 p-1.5 rounded-lg shadow-lg shadow-blue-500/20">
+              <Shield className="h-5 w-5 text-white" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xl font-bold text-slate-900 tracking-tight text-nowrap">DSGVO<span className="text-blue-600 font-extrabold">Scan</span></span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-xl font-bold text-slate-900 tracking-tight text-nowrap">DSGVO<span className="text-blue-600 font-extrabold">Scan</span></span>
-          </div>
+          {/* Close button for mobile */}
+          <button
+            className="lg:hidden text-slate-400 hover:text-slate-600"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         <nav className="flex-1 space-y-1 p-4 overflow-y-auto font-bold">
@@ -125,22 +151,32 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 lg:pl-64 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen lg:w-0">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white/80 backdrop-blur-md px-6 lg:px-8">
-          <div className="lg:hidden flex items-center gap-2">
-            <div className="bg-blue-600 p-1 rounded-md">
-              <Shield className="h-4 w-4 text-white" />
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-white/80 backdrop-blur-md px-4 lg:px-8">
+          <div className="flex items-center gap-3">
+             {/* Mobile Hamburger */}
+            <button
+              className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
+              onClick={() => setMobileMenuOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+
+            <div className="lg:hidden flex items-center gap-2">
+              <div className="bg-blue-600 p-1 rounded-md">
+                <Shield className="h-4 w-4 text-white" />
+              </div>
+              <h1 className="text-lg font-bold text-slate-900 flex items-center gap-1.5">
+                 DSGVO Scan
+              </h1>
             </div>
-            <h1 className="text-lg font-bold text-slate-900 flex items-center gap-1.5">
-               DSGVO Scan
-            </h1>
-          </div>
-          <div className="hidden lg:block text-slate-400 text-xs font-bold uppercase tracking-widest">
-            Kundenmanagement
+            <div className="hidden lg:block text-slate-400 text-xs font-bold uppercase tracking-widest">
+              Kundenmanagement
+            </div>
           </div>
           
-          <div className="flex items-center gap-4 text-nowrap">
+          <div className="flex items-center gap-3 md:gap-4 text-nowrap">
             <button 
               onClick={() => alert('Sie haben aktuell keine neuen Benachrichtigungen. ✨')}
               className="relative rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all group"
@@ -156,12 +192,12 @@ export default function DashboardLayout({
               <div className="h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold leading-none">
                 {profile?.company_name?.substring(0, 2).toUpperCase() || '??'}
               </div>
-              <span className="text-xs font-bold text-slate-700">Konto</span>
+              <span className="text-xs font-bold text-slate-700 hidden md:inline-block">Konto</span>
             </button>
           </div>
         </header>
 
-        <main className="p-6 lg:p-8 animate-in fade-in duration-500">
+        <main className="p-4 md:p-6 lg:p-8 animate-in fade-in duration-500 overflow-x-hidden">
           {children}
         </main>
       </div>
