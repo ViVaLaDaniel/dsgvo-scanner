@@ -233,13 +233,9 @@ export default function SettingsPage() {
         </Card>
 
         <div className="flex justify-end pt-4">
-          <Button onClick={handleSave} disabled={loading} className="bg-blue-600 hover:bg-blue-700 font-bold px-10 h-12 shadow-lg shadow-blue-500/20 gap-2">
-            {loading ? 'Wird gespeichert...' : (
-              <>
-                <Save className="h-4 w-4" />
-                Einstellungen speichern
-              </>
-            )}
+          <Button onClick={handleSave} isLoading={loading} className="bg-blue-600 hover:bg-blue-700 font-bold px-10 h-12 shadow-lg shadow-blue-500/20 gap-2">
+            {!loading && <Save className="h-4 w-4" />}
+            Einstellungen speichern
           </Button>
         </div>
       </div>

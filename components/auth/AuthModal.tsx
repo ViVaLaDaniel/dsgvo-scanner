@@ -195,14 +195,10 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
 
               <Button
                 type="submit"
-                disabled={loading}
+                isLoading={loading}
                 className="w-full font-bold h-12 shadow-lg shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 rounded-xl mt-4"
               >
-                {loading ? (
-                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  view === 'login' ? 'Anmelden' : 'Zugang anfordern'
-                )}
+                {view === 'login' ? 'Anmelden' : 'Zugang anfordern'}
               </Button>
             </motion.form>
           )}

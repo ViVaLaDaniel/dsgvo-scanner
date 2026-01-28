@@ -65,7 +65,7 @@ export function Testimonials() {
                   </div>
                   
                   <p className="text-slate-700 text-lg font-medium leading-relaxed italic mb-8 flex-1">
-                    "{t.content}"
+                    &quot;{t.content}&quot;
                   </p>
 
                   <div className="space-y-4">
