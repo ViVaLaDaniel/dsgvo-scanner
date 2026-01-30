@@ -1,8 +1,4 @@
 {
-<<<<<<< HEAD
-  "status": "failed",
-=======
   "status": "passed",
->>>>>>> origin/main
   "failedTests": []
 }
