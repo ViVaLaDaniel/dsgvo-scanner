@@ -40,6 +40,9 @@
 ## Структура файлов
 - `/app`: Маршруты приложения
   - `/dashboard`: Защищенная зона (обзор, список сайтов, настройки)
+    - `layout.tsx`: Корневой layout дашборда (Provider)
+    - `layout-content.tsx`: UI оболочка дашборда
+    - `dashboard-context.tsx`: Context API для управления состоянием
   - `/login`, `/register`: Аутентификация
 - `/lib/supabase`: Клиенты Supabase (browser/server)
 - `/types/supabase.ts`: TypeScript интерфейсы для БД

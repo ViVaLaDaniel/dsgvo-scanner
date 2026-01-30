@@ -18,36 +18,19 @@ import { cn } from '@/lib/utils';
 import { createClient } from '@/lib/supabase/client';
 import { Website, Scan } from '@/types/supabase';
 import Link from 'next/link';
+import { useDashboard } from './dashboard-context';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({
-    websitesCount: 0,
-    websiteLimit: 10,
-    criticalCount: 0,
-    avgScore: 0
-  });
+  const { profile, websiteCount, user } = useDashboard();
   const [recentScans, setRecentScans] = useState<any[]>([]);
   const [supabase] = useState(() => createClient());
   const router = useRouter();
 
   useEffect(() => {
-    async function loadDashboardData() {
-      const { data: { user } } = await supabase.auth.getUser();
+    async function loadRecentScans() {
       if (!user) return;
 
-      // 1. Load Profile for limit
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('website_limit')
-        .eq('id', user.id)
-        .single();
-
-      // 2. Load Websites count
-      const { count: websitesCount } = await supabase
-        .from('websites')
-        .select('*', { count: 'exact', head: true });
-
-      // 3. Load Recent Scans with website info
+      // Only Load Recent Scans
       const { data: scans } = await supabase
         .from('scans')
         .select(`
@@ -59,13 +42,6 @@ export default function DashboardPage() {
         `)
         .order('created_at', { ascending: false })
         .limit(5);
-
-      setStats({
-        websitesCount: websitesCount || 0,
-        websiteLimit: profile?.website_limit || 10,
-        criticalCount: 0, // In production, calculate from DB
-        avgScore: 92 // Placeholder
-      });
 
       if (scans) {
         setRecentScans(scans.map((s: any) => ({
@@ -80,8 +56,15 @@ export default function DashboardPage() {
       }
     }
 
-    loadDashboardData();
-  }, [supabase]);
+    loadRecentScans();
+  }, [supabase, user]);
+
+  const stats = {
+    websitesCount: websiteCount || 0,
+    websiteLimit: profile?.website_limit || 10,
+    criticalCount: 0, // In production, calculate from DB
+    avgScore: 92 // Placeholder
+  };
 
   return (
     <div className="space-y-8">
