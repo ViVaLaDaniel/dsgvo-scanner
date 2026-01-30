@@ -55,6 +55,7 @@ describe('Scan API Performance Benchmark', () => {
 
     // Should be roughly 1 * DELAY (plus overhead), but definitely less than 2 * DELAY
     expect(duration).toBeLessThan(DB_DELAY_MS * 1.9);
-    expect(duration).toBeGreaterThanOrEqual(DB_DELAY_MS);
+    // Allow small variance (e.g. 99ms instead of 100ms due to timer resolution)
+    expect(duration).toBeGreaterThanOrEqual(DB_DELAY_MS - 10);
   });
 });

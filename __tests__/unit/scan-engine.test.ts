@@ -24,6 +24,7 @@ describe('Scan Engine (Unit)', () => {
       goto: vi.fn().mockResolvedValue({}),
       evaluate: vi.fn().mockResolvedValue({}),
       waitForTimeout: vi.fn().mockResolvedValue({}),
+      content: vi.fn().mockResolvedValue('<html><body></body></html>'),
       close: vi.fn().mockResolvedValue({}),
     };
 

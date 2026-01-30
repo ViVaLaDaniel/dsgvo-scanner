@@ -84,10 +84,47 @@ export const SCAN_PATTERNS = {
   }
 };
 
+// Optimization: Pre-compile a single Master Regex for O(N) scanning
+// instead of looping through patterns O(N*M).
+const MASTER_REGEX = new RegExp(
+  Object.entries(SCAN_PATTERNS)
+    .map(([key, p]) => `(?<${key}>${p.regex.source})`)
+    .join('|'),
+  'gi'
+);
+
+export function scanHtmlContent(html: string, detectedKeys: Set<string>): Finding[] {
+  const newFindings: Finding[] = [];
+  MASTER_REGEX.lastIndex = 0; // Reset state
+
+  let match;
+  while ((match = MASTER_REGEX.exec(html)) !== null) {
+    if (!match.groups) continue;
+
+    // Find which pattern matched
+    for (const key in match.groups) {
+      if (match.groups[key] !== undefined && !detectedKeys.has(key)) {
+        detectedKeys.add(key);
+        const pattern = SCAN_PATTERNS[key as keyof typeof SCAN_PATTERNS];
+        newFindings.push({
+          ...pattern.finding,
+          technical_details: {
+            source: 'static_analysis',
+            match: match.groups[key].substring(0, 200)
+          }
+        } as Finding);
+        // Once we found the matching group for this hit, break inner loop
+        break;
+      }
+    }
+  }
+  return newFindings;
+}
+
 export async function analyzeWebsite(url: string): Promise<ScanResult> {
   let score = 100;
   const findings: Finding[] = [];
-  const detectedUrls = new Set<string>();
+  const detectedKeys = new Set<string>();
 
   let browser;
   try {
@@ -109,8 +146,8 @@ export async function analyzeWebsite(url: string): Promise<ScanResult> {
     page.on('request', request => {
       const requestUrl = request.url();
       for (const [key, pattern] of Object.entries(SCAN_PATTERNS)) {
-        if (pattern.regex.test(requestUrl) && !detectedUrls.has(key)) {
-          detectedUrls.add(key);
+        if (pattern.regex.test(requestUrl) && !detectedKeys.has(key)) {
+          detectedKeys.add(key);
           findings.push({ 
             ...pattern.finding,
             technical_details: { url: requestUrl }
@@ -142,7 +179,14 @@ export async function analyzeWebsite(url: string): Promise<ScanResult> {
     // Wait a bit more for dynamic requests after scroll
     await page.waitForTimeout(2000);
 
-    // 5. ANALYZE COOKIES & STORAGE
+    // 5. STATIC ANALYSIS (Optimized)
+    // Scan the full HTML content for patterns that might not have triggered a network request
+    // (e.g. blocked scripts, meta tags, css links)
+    const html = await page.content();
+    const staticFindings = scanHtmlContent(html, detectedKeys);
+    findings.push(...staticFindings);
+
+    // 6. ANALYZE COOKIES & STORAGE
     const cookies = await context.cookies();
     const localStorageData = await page.evaluate(() => JSON.stringify(window.localStorage));
     
@@ -159,7 +203,7 @@ export async function analyzeWebsite(url: string): Promise<ScanResult> {
       } as Finding);
     }
 
-    // 6. Scoring logic
+    // 7. Scoring logic
     for (const finding of findings) {
       if (finding.severity === 'high') score -= 20;
       else if (finding.severity === 'medium') score -= 10;
