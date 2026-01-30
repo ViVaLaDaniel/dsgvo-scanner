@@ -35,30 +35,37 @@ export default function DashboardPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // 1. Load Profile for limit
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('website_limit')
-        .eq('id', user.id)
-        .single();
+      // Load all data in parallel for performance
+      const [
+        { data: profile },
+        { count: websitesCount },
+        { data: scans }
+      ] = await Promise.all([
+        // 1. Load Profile for limit
+        supabase
+          .from('user_profiles')
+          .select('website_limit')
+          .eq('id', user.id)
+          .single(),
 
-      // 2. Load Websites count
-      const { count: websitesCount } = await supabase
-        .from('websites')
-        .select('*', { count: 'exact', head: true });
+        // 2. Load Websites count
+        supabase
+          .from('websites')
+          .select('*', { count: 'exact', head: true }),
 
-      // 3. Load Recent Scans with website info
-      const { data: scans } = await supabase
-        .from('scans')
-        .select(`
-          id,
-          status,
-          violations_count,
-          created_at,
-          website:websites(client_name, url)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(5);
+        // 3. Load Recent Scans with website info
+        supabase
+          .from('scans')
+          .select(`
+            id,
+            status,
+            violations_count,
+            created_at,
+            website:websites(client_name, url)
+          `)
+          .order('created_at', { ascending: false })
+          .limit(5)
+      ]);
 
       setStats({
         websitesCount: websitesCount || 0,
