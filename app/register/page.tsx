@@ -196,8 +196,8 @@ function RegisterForm() {
             </select>
           </div>
 
-          <Button type="submit" className="w-full py-6 font-bold text-lg shadow-lg shadow-blue-500/20 transition-all active:scale-95" disabled={loading}>
-            {loading ? 'Wird erstellt...' : 'Konto erstellen'}
+          <Button type="submit" className="w-full py-6 font-bold text-lg shadow-lg shadow-blue-500/20 transition-all active:scale-95" isLoading={loading}>
+            Konto erstellen
           </Button>
 
           <div className="pt-2 text-center text-sm text-slate-600 font-medium">

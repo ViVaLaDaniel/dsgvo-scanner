@@ -105,8 +105,8 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full py-6 font-bold text-lg shadow-lg shadow-blue-500/20" disabled={loading}>
-              {loading ? 'Wird geladen...' : 'Anmelden'}
+            <Button type="submit" className="w-full py-6 font-bold text-lg shadow-lg shadow-blue-500/20" isLoading={loading}>
+              Anmelden
             </Button>
 
             <div className="pt-2 text-center text-sm text-slate-600 font-medium">
