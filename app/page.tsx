@@ -1,11 +1,40 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Shield, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Plus, Globe, Trash2, Play, ExternalLink, ShieldCheck, ArrowRight, CheckCircle, Shield, Clock, AlertTriangle } from 'lucide-react';
+import { AuthModal } from '@/components/auth/AuthModal';
+import { useSmoothScroll } from '@/lib/hooks/useSmoothScroll';
+import { DashboardPreview } from '@/components/landing/DashboardPreview';
+import { Testimonials } from '@/components/landing/Testimonials';
+import { DemoModal } from '@/components/landing/DemoModal';
 
 export default function HomePage() {
+  const { scrollTo } = useSmoothScroll();
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
+  const [authModal, setAuthModal] = useState<{isOpen: boolean, view: 'login' | 'register'}>({
+    isOpen: false,
+    view: 'login'
+  });
+
+  const openAuth = (view: 'login' | 'register') => {
+    setAuthModal({ isOpen: true, view });
+  };
+
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-50 via-slate-50 to-slate-100 flex flex-col">
+      <AuthModal
+        isOpen={authModal.isOpen}
+        onClose={() => setAuthModal(prev => ({ ...prev, isOpen: false }))}
+        initialView={authModal.view}
+      />
+      <DemoModal
+        isOpen={isDemoOpen}
+        onClose={() => setIsDemoOpen(false)}
+      />
+
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/70 backdrop-blur-md transition-all">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center max-w-7xl">
@@ -17,22 +46,36 @@ export default function HomePage() {
               <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                 DSGVO<span className="text-blue-600">Scanner</span>
               </h1>
-              <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest border border-blue-200">Beta</span>
             </div>
           </div>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-            <Link href="#features" className="hover:text-blue-600 transition-colors">Funktionen</Link>
-            <Link href="#pricing" className="hover:text-blue-600 transition-colors">Preise</Link>
+            <button
+              onClick={() => scrollTo('features')}
+              className="hover:text-blue-600 transition-colors cursor-pointer"
+            >
+              Funktionen
+            </button>
+            <button
+              onClick={() => scrollTo('pricing')}
+              className="hover:text-blue-600 transition-colors cursor-pointer"
+            >
+              Preise
+            </button>
           </nav>
           <div className="flex gap-4 items-center">
-            <Link href="/login">
-              <Button variant="ghost" className="font-bold text-slate-600 hover:text-blue-600">Anmelden</Button>
-            </Link>
-            <Link href="/login">
-              <Button className="shadow-lg shadow-blue-500/20 font-bold px-6 bg-blue-600 hover:bg-blue-700 transition-all">
-                Kostenlos Testen
-              </Button>
-            </Link>
+            <Button
+              variant="ghost"
+              onClick={() => openAuth('login')}
+              className="font-bold text-slate-600 hover:text-blue-600"
+            >
+              Anmelden
+            </Button>
+            <Button
+              onClick={() => openAuth('register')}
+              className="shadow-lg shadow-blue-500/20 font-bold px-6 bg-blue-600 hover:bg-blue-700 transition-all"
+            >
+              Kostenlos Testen
+            </Button>
           </div>
         </div>
       </header>
@@ -58,17 +101,26 @@ export default function HomePage() {
             sofortige Benachrichtigungen bei DSGVO-Verstößen. Sparen Sie Zeit und minimieren Sie Haftungsrisiken.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/login">
-              <Button size="lg" className="text-lg px-8 py-7 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 transition-all group">
-                Jetzt testen (Dev Mode)
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </Link>
-            <Link href="/demo">
-              <Button size="lg" variant="outline" className="text-lg px-8 py-7 bg-white dark:bg-slate-950">
-                Demo ansehen
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              onClick={() => openAuth('register')}
+              className="text-lg px-8 py-7 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 transition-all group"
+            >
+              Jetzt testen (Dev Mode)
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => setIsDemoOpen(true)}
+              className="text-lg px-8 py-7 bg-white dark:bg-slate-950"
+            >
+              Demo ansehen
+            </Button>
+          </div>
+
+          <div className="mt-20">
+            <DashboardPreview />
           </div>
           
           <div className="mt-12 flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm font-medium text-slate-500">
@@ -171,6 +223,23 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Mid-Page CTA */}
+        <section className="bg-blue-600 py-12">
+          <div className="container mx-auto px-4 max-w-7xl flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="text-white space-y-2 text-center md:text-left">
+              <h3 className="text-2xl font-bold">Bereit, Zeit и Haftungsrisiken zu minimieren?</h3>
+              <p className="text-blue-100 font-medium opacity-90">Starten Sie jetzt mit Ihrer ersten Mandanten-Website — 100% kostenlos.</p>
+            </div>
+            <Button
+              size="lg"
+              onClick={() => openAuth('register')}
+              className="bg-white text-blue-600 hover:bg-white/90 font-black px-10 h-14 shadow-2xl shadow-blue-900/20"
+            >
+              Gratis Account erstellen
+            </Button>
+          </div>
+        </section>
+
         {/* Pricing */}
         <section id="pricing" className="container mx-auto px-4 py-24 bg-slate-50 border-y border-slate-200">
           <div className="max-w-7xl mx-auto">
@@ -205,9 +274,13 @@ export default function HomePage() {
                   </ul>
                 </CardContent>
                 <div className="p-6 pt-0">
-                  <Link href="/login">
-                    <Button variant="outline" className="w-full py-6 font-bold">Plan wählen</Button>
-                  </Link>
+                  <Button
+                    variant="outline"
+                    onClick={() => openAuth('register')}
+                    className="w-full py-6 font-bold"
+                  >
+                    Plan wählen
+                  </Button>
                 </div>
               </Card>
 
@@ -245,11 +318,12 @@ export default function HomePage() {
                   </ul>
                 </CardContent>
                 <div className="p-6 pt-0">
-                  <Link href="/register?plan=professional">
-                    <Button className="w-full py-6 font-bold shadow-lg shadow-blue-500/20">
-                      Jetzt durchstarten
-                    </Button>
-                  </Link>
+                  <Button
+                    onClick={() => openAuth('register')}
+                    className="w-full py-6 font-bold shadow-lg shadow-blue-500/20"
+                  >
+                    Jetzt durchstarten
+                  </Button>
                 </div>
               </Card>
 
@@ -280,14 +354,20 @@ export default function HomePage() {
                   </ul>
                 </CardContent>
                 <div className="p-6 pt-0">
-                  <Link href="/register?plan=business">
-                    <Button variant="outline" className="w-full py-6 font-bold">Kontakt aufnehmen</Button>
-                  </Link>
+                  <Button
+                    variant="outline"
+                    onClick={() => openAuth('register')}
+                    className="w-full py-6 font-bold"
+                  >
+                    Kontakt aufnehmen
+                  </Button>
                 </div>
               </Card>
             </div>
           </div>
         </section>
+
+        <Testimonials />
       </main>
 
       {/* Footer */}

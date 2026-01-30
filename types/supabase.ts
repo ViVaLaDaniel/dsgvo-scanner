@@ -52,3 +52,15 @@ export interface ViolationDetail {
   recommendation_de: string
   technical_details?: any
 }
+
+export interface Agency {
+  id: string
+  owner_id: string
+  name: string
+  logo_url: string | null
+  brand_color: string
+  contact_email: string | null
+  report_footer: string
+  created_at: string
+  updated_at: string
+}

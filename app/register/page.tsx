@@ -25,6 +25,7 @@ function RegisterForm() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +39,7 @@ function RegisterForm() {
     }
 
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -52,13 +53,47 @@ function RegisterForm() {
 
       if (signUpError) throw signUpError;
 
-      router.push('/dashboard');
-      router.refresh();
+      if (data?.session) {
+        router.push('/dashboard');
+        router.refresh();
+      } else {
+        setSubmitted(true);
+        setLoading(false);
+      }
     } catch (err: any) {
       setError(err.message || 'Registrierung fehlgeschlagen');
       setLoading(false);
     }
   };
+
+  if (submitted) {
+    return (
+      <Card className="w-full max-w-md shadow-xl border-slate-200/60 backdrop-blur-sm bg-white/95">
+        <CardHeader className="text-center space-y-4">
+          <div className="flex justify-center mb-2">
+            <div className="bg-green-100 p-4 rounded-full">
+              <Shield className="h-10 w-10 text-green-600" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold text-slate-900">E-Mail bestätigen</CardTitle>
+          <CardDescription className="text-slate-600 font-medium">
+            Wir haben einen Bestätigungslink an <strong className="text-blue-600">{formData.email}</strong> gesendet.
+            Bitte klicken Sie auf den Link, um Ihr Konto zu aktivieren.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-xs text-blue-800 leading-relaxed font-medium">
+            <strong>Hinweis:</strong> Falls Sie keine E-Mail erhalten haben, prüfen Sie bitte Ihren Spam-Ordner.
+          </div>
+          <Link href="/login" className="block w-full">
+            <Button variant="outline" className="w-full py-6 font-bold">
+              Zurück zum Login
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md shadow-xl border-slate-200/60 backdrop-blur-sm bg-white/95">
@@ -161,8 +196,8 @@ function RegisterForm() {
             </select>
           </div>
 
-          <Button type="submit" className="w-full py-6 font-bold text-lg shadow-lg shadow-blue-500/20 transition-all active:scale-95" disabled={loading}>
-            {loading ? 'Wird erstellt...' : 'Konto erstellen'}
+          <Button type="submit" className="w-full py-6 font-bold text-lg shadow-lg shadow-blue-500/20 transition-all active:scale-95" isLoading={loading}>
+            Konto erstellen
           </Button>
 
           <div className="pt-2 text-center text-sm text-slate-600 font-medium">

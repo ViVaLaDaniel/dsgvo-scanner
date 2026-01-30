@@ -7,29 +7,23 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Shield, User, Building, CreditCard, Save } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { UserProfile } from '@/types/supabase';
+import { UserProfile, Agency } from '@/types/supabase';
 import { cn } from '@/lib/utils';
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [branding, setBranding] = useState({
+  const [branding, setBranding] = useState<Partial<Agency>>({
     logo_url: '',
-    primary_color: '#2563eb', // Default blue-600
+    brand_color: '#2563eb', // Default blue-600
     report_footer: 'Professionelles DSGVO-Monitoring'
   });
   const [loading, setLoading] = useState(false);
   const [supabase] = useState(() => createClient());
 
   useEffect(() => {
-    async function loadProfile() {
+    async function loadData() {
       const isTestSession = document.cookie.includes('test-session=true');
       
-      // Load branding settings from sessionStorage
-      const savedBranding = sessionStorage.getItem('user-branding');
-      if (savedBranding) {
-        setBranding(JSON.parse(savedBranding));
-      }
-
       if (isTestSession) {
         setProfile({
           company_name: 'Dev Tester GmbH',
@@ -42,23 +36,48 @@ export default function SettingsPage() {
 
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data } = await supabase.from('user_profiles').select('*').eq('id', user.id).single();
-        if (data) setProfile(data);
+        // 1. Load Profile
+        const { data: profileData } = await supabase.from('user_profiles').select('*').eq('id', user.id).single();
+        if (profileData) setProfile(profileData);
+
+        // 2. Load Agency/Branding
+        const { data: agencyData } = await supabase.from('agencies').select('*').eq('owner_id', user.id).single();
+        if (agencyData) {
+          setBranding(agencyData);
+        }
       }
     }
-    loadProfile();
+    loadData();
   }, [supabase]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setLoading(true);
     
-    // Save branding to sessionStorage
-    sessionStorage.setItem('user-branding', JSON.stringify(branding));
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Nicht authentifiziert');
 
-    setTimeout(() => {
-      setLoading(false);
+      // Update Agency Branding
+      const { error } = await supabase
+        .from('agencies')
+        .upsert({
+          owner_id: user.id,
+          name: profile?.company_name || 'Agentur',
+          logo_url: branding.logo_url,
+          brand_color: branding.brand_color,
+          report_footer: branding.report_footer,
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+
       alert('Einstellungen успешно сохранены! ✅');
-    }, 800);
+    } catch (err: any) {
+      console.error('Save Error:', err);
+      alert('Ошибка при сохранении: ' + (err.message || 'Unbekannter Fehler'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const colors = [
@@ -135,7 +154,7 @@ export default function SettingsPage() {
                   <label className="text-sm font-bold text-slate-700">Logo-URL (für Berichte)</label>
                   <Input 
                     placeholder="https://ihre-website.de/logo.png"
-                    value={branding.logo_url}
+                    value={branding.logo_url || ''}
                     onChange={(e) => setBranding({ ...branding, logo_url: e.target.value })}
                     className="bg-white border-slate-200"
                   />
@@ -144,10 +163,10 @@ export default function SettingsPage() {
 
                 {/* Report Footer */}
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Bericht-Fußzeile</label>
+                  <label className="text-sm font-bold text-slate-700">Bericht-Fußзеile</label>
                   <Input 
                     placeholder="Eigener Text im Footer..."
-                    value={branding.report_footer}
+                    value={branding.report_footer || ''}
                     onChange={(e) => setBranding({ ...branding, report_footer: e.target.value })}
                     className="bg-white border-slate-200"
                   />
@@ -161,10 +180,10 @@ export default function SettingsPage() {
                   {colors.map((c) => (
                     <button
                       key={c.value}
-                      onClick={() => setBranding({ ...branding, primary_color: c.value })}
+                      onClick={() => setBranding({ ...branding, brand_color: c.value })}
                       className={cn(
                         "h-10 w-10 rounded-xl border-2 transition-all p-0.5",
-                        branding.primary_color === c.value ? "border-slate-900 scale-110 shadow-lg" : "border-transparent"
+                        branding.brand_color === c.value ? "border-slate-900 scale-110 shadow-lg" : "border-transparent"
                       )}
                     >
                       <div className="h-full w-full rounded-lg" style={{ backgroundColor: c.value }} />
@@ -174,8 +193,8 @@ export default function SettingsPage() {
                 <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 mt-4">
                   <p className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-2">Vorschau</p>
                   <div className="flex items-center gap-2">
-                    <div className="h-3 w-24 rounded-full" style={{ backgroundColor: branding.primary_color }} />
-                    <div className="h-3 w-8 rounded-full" style={{ backgroundColor: branding.primary_color, opacity: 0.3 }} />
+                    <div className="h-3 w-24 rounded-full" style={{ backgroundColor: branding.brand_color }} />
+                    <div className="h-3 w-8 rounded-full" style={{ backgroundColor: branding.brand_color, opacity: 0.3 }} />
                   </div>
                 </div>
               </div>
@@ -214,13 +233,9 @@ export default function SettingsPage() {
         </Card>
 
         <div className="flex justify-end pt-4">
-          <Button onClick={handleSave} disabled={loading} className="bg-blue-600 hover:bg-blue-700 font-bold px-10 h-12 shadow-lg shadow-blue-500/20 gap-2">
-            {loading ? 'Wird gespeichert...' : (
-              <>
-                <Save className="h-4 w-4" />
-                Einstellungen speichern
-              </>
-            )}
+          <Button onClick={handleSave} isLoading={loading} className="bg-blue-600 hover:bg-blue-700 font-bold px-10 h-12 shadow-lg shadow-blue-500/20 gap-2">
+            {!loading && <Save className="h-4 w-4" />}
+            Einstellungen speichern
           </Button>
         </div>
       </div>

@@ -61,23 +61,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Analysis failed: ' + scanError.message }, { status: 500 });
     }
 
-    // 5. Update scan record with results
-    const { error: updateError } = await supabase
-      .from('scans')
-      .update({
-        status: 'completed',
-        violations_count: scanResult.findings.length,
-        risk_score: scanResult.score,
-        results: { findings: scanResult.findings },
-        completed_at: new Date().toISOString()
-      })
-      .eq('id', scan.id);
+    // 5. Update scan record & 6. Update website last_scan_at (PARALLEL)
+    const [{ error: updateError }] = await Promise.all([
+      supabase
+        .from('scans')
+        .update({
+          status: 'completed',
+          violations_count: scanResult.findings.length,
+          risk_score: scanResult.score,
+          results: { findings: scanResult.findings },
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', scan.id),
 
-    // 6. Update website last_scan_at
-    await supabase
-      .from('websites')
-      .update({ last_scan_at: new Date().toISOString() })
-      .eq('id', websiteId);
+      supabase
+        .from('websites')
+        .update({ last_scan_at: new Date().toISOString() })
+        .eq('id', websiteId)
+    ]);
 
     if (updateError) {
       return NextResponse.json({ error: 'Failed to update scan record' }, { status: 500 });
