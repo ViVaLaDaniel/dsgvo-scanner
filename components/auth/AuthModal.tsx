@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
   });
   const [error, setError] = React.useState('');
   const [loading, setLoading] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
   const router = useRouter();
   const supabase = createClient();
 
@@ -36,6 +38,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
       setView(initialView);
       setIsSubmitted(false);
       setError('');
+      setShowPassword(false);
     }
   }, [isOpen, initialView]);
 
@@ -145,8 +148,9 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
               {view === 'register' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">Vorname</label>
+                    <label htmlFor="register-name" className="text-sm font-bold text-slate-700">Vorname</label>
                     <Input
+                      id="register-name"
                       placeholder="Stefan"
                       value={formData.name}
                       onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -155,8 +159,9 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">Unternehmen</label>
+                    <label htmlFor="register-company" className="text-sm font-bold text-slate-700">Unternehmen</label>
                     <Input
+                      id="register-company"
                       placeholder="Meier GmbH"
                       value={formData.company}
                       onChange={(e) => setFormData({...formData, company: e.target.value})}
@@ -168,8 +173,9 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
               )}
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">E-Mail Adresse</label>
+                <label htmlFor="auth-email" className="text-sm font-bold text-slate-700">E-Mail Adresse</label>
                 <Input
+                  id="auth-email"
                   type="email"
                   placeholder="name@example.com"
                   value={formData.email}
@@ -181,15 +187,30 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
 
               {view === 'login' && (
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Passwort</label>
-                  <Input
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    required
-                    className="bg-white/50 border-slate-200 focus:ring-blue-500/20 rounded-xl"
-                  />
+                  <label htmlFor="login-password" className="text-sm font-bold text-slate-700">Passwort</label>
+                  <div className="relative">
+                    <Input
+                      id="login-password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                      required
+                      className="bg-white/50 border-slate-200 focus:ring-blue-500/20 rounded-xl pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md"
+                      aria-label={showPassword ? "Passwort verbergen" : "Passwort anzeigen"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               )}
 
