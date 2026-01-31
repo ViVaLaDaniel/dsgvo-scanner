@@ -67,7 +67,29 @@ export default function WebsitesPage() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (websitesData) setWebsites(websitesData);
+    if (websitesData) {
+      setWebsites(websitesData);
+      
+      // Load latest scans for these websites
+      const websiteIds = websitesData.map(w => w.id);
+      if (websiteIds.length > 0) {
+        const { data: scansData } = await supabase
+          .from('scans')
+          .select('*')
+          .in('website_id', websiteIds)
+          .order('created_at', { ascending: false });
+
+        if (scansData) {
+          // Keep only the latest scan per website
+          const latestScans = websitesData.map(w => {
+            const scan = scansData.find(s => s.website_id === w.id);
+            return scan ? { ...scan, website_id: w.id } : null;
+          }).filter(Boolean);
+          
+          setSavedScans(latestScans);
+        }
+      }
+    }
   };
 
   const onSubmit = async (values: WebsiteFormValues) => {
@@ -123,7 +145,10 @@ export default function WebsitesPage() {
 
   const handleScanNow = async (websiteId: string, hasScan: boolean) => {
     if (hasScan) {
-      router.push(`/dashboard/scans/${websiteId}`);
+      const scan = savedScans.find(s => s.website_id === websiteId);
+      if (scan) {
+        router.push(`/dashboard/scans/${scan.id}`);
+      }
       return;
     }
 
@@ -170,7 +195,7 @@ export default function WebsitesPage() {
         isOpen={showAddForm}
         onClose={() => setShowAddForm(false)}
         title="Neue Website hinzufügen"
-        description="Fügen Sie die URL и den Mandantennamen hinzu"
+        description="Fügen Sie die URL und den Mandantennamen hinzu"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {error && (
@@ -230,8 +255,8 @@ export default function WebsitesPage() {
           </Card>
         ) : (
           websites.map((website) => {
-            const scanResult = savedScans.find((s: any) => s.id === website.id || s.url === website.url);
-            const score = scanResult?.score !== undefined ? scanResult.score : null;
+            const scanResult = savedScans.find((s: any) => s.website_id === website.id);
+            const score = scanResult?.risk_score !== undefined ? scanResult.risk_score : null;
 
             return (
               <Card 

@@ -69,13 +69,6 @@ export default function ScanResultPage() {
   });
 
   useEffect(() => {
-    // Load branding settings
-    const savedBranding = sessionStorage.getItem('user-branding');
-    if (savedBranding) {
-      setBranding(JSON.parse(savedBranding));
-    }
-
-    // Load real scan data from Supabase
     async function loadScanData() {
       try {
         setLoading(true);
@@ -101,6 +94,24 @@ export default function ScanResultPage() {
           status: scan.risk_score < 50 ? 'Kritisch' : scan.risk_score < 85 ? 'Warnung' : 'Sicher'
         });
         setFindings(dbFindings);
+
+        // Fetch Agency branding for the owner of the website
+        const ownerId = scan.website?.owner_id;
+        if (ownerId) {
+          const { data: agencyData } = await supabase
+            .from('agencies')
+            .select('*')
+            .eq('owner_id', ownerId)
+            .single();
+          
+          if (agencyData) {
+            setBranding({
+              logo_url: agencyData.logo_url || '',
+              primary_color: agencyData.brand_color || '#2563eb',
+              report_footer: agencyData.report_footer || 'Professionelles DSGVO-Monitoring'
+            });
+          }
+        }
       } catch (err) {
         console.error('Failed to load scan data:', err);
       } finally {
@@ -346,7 +357,11 @@ export default function ScanResultPage() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between py-2 border-b border-white/10">
               <span className="text-sm font-medium text-slate-400">Google Fonts</span>
-              {reportData?.url?.toLowerCase().includes('vitbikes.de') || reportData?.url?.toLowerCase().includes('google') ? <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-none">GEFAHR</Badge> : <Badge className="bg-green-500/20 text-green-400 border-none">OK</Badge>}
+              {findings.some(f => f.category === 'Google Fonts' && f.status === 'violation') ? (
+                <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-none">GEFAHR</Badge>
+              ) : (
+                <Badge className="bg-green-500/20 text-green-400 border-none">OK</Badge>
+              )}
             </div>
             <div className="flex items-center justify-between py-2 border-b border-white/10">
               <span className="text-sm font-medium text-slate-400">Cookie Banner</span>

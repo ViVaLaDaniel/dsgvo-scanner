@@ -122,6 +122,9 @@ CREATE TABLE IF NOT EXISTS public.scans (
   violations_count INTEGER DEFAULT 0,
   risk_score INTEGER DEFAULT 0,
   results JSONB,
+  error_log TEXT,
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

@@ -227,7 +227,7 @@ export default function HomePage() {
         <section className="bg-blue-600 py-12">
           <div className="container mx-auto px-4 max-w-7xl flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="text-white space-y-2 text-center md:text-left">
-              <h3 className="text-2xl font-bold">Bereit, Zeit и Haftungsrisiken zu minimieren?</h3>
+              <h3 className="text-2xl font-bold">Bereit, Zeit und Haftungsrisiken zu minimieren?</h3>
               <p className="text-blue-100 font-medium opacity-90">Starten Sie jetzt mit Ihrer ersten Mandanten-Website — 100% kostenlos.</p>
             </div>
             <Button 

@@ -9,6 +9,7 @@ import { Shield, User, Building, CreditCard, Save } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { UserProfile, Agency } from '@/types/supabase';
 import { cn } from '@/lib/utils';
+import { PricingSection } from '@/components/dashboard/PricingSection';
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -18,6 +19,7 @@ export default function SettingsPage() {
     report_footer: 'Professionelles DSGVO-Monitoring'
   });
   const [loading, setLoading] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
   const [supabase] = useState(() => createClient());
 
   useEffect(() => {
@@ -71,10 +73,10 @@ export default function SettingsPage() {
 
       if (error) throw error;
       
-      alert('Einstellungen успешно сохранены! ✅');
+      alert('Einstellungen erfolgreich gespeichert! ✅');
     } catch (err: any) {
       console.error('Save Error:', err);
-      alert('Ошибка при сохранении: ' + (err.message || 'Unbekannter Fehler'));
+      alert('Fehler beim Speichern: ' + (err.message || 'Unbekannter Fehler'));
     } finally {
       setLoading(false);
     }
@@ -92,7 +94,7 @@ export default function SettingsPage() {
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div>
         <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">Einstellungen</h2>
-        <p className="text-slate-500 font-medium mt-1">Verwalten Sie Ihr Konto и Ihre Branding-Präferenzen</p>
+        <p className="text-slate-500 font-medium mt-1">Verwalten Sie Ihr Konto und Ihre Branding-Präferenzen</p>
       </div>
 
       <div className="grid gap-8 max-w-4xl">
@@ -141,8 +143,8 @@ export default function SettingsPage() {
                 <Shield className="h-5 w-5" />
               </div>
               <div>
-                <CardTitle className="text-lg font-bold">Брендинг и White-Label</CardTitle>
-                <CardDescription className="font-medium">Настройте внешний вид ваших отчетов</CardDescription>
+                <CardTitle className="text-lg font-bold">Branding und White-Label</CardTitle>
+                <CardDescription className="font-medium">Passen Sie das Erscheinungsbild Ihrer Berichte an</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -225,10 +227,19 @@ export default function SettingsPage() {
                 <h4 className="text-2xl font-black">{profile?.website_limit || 50} Websites</h4>
                 <p className="text-slate-400 text-xs font-bold mt-1 uppercase tracking-widest">Inklusive White-Label Reports</p>
               </div>
-              <Button className="bg-white text-slate-900 hover:bg-slate-100 font-bold px-8 shadow-xl shadow-white/5 no-print">
-                Plan ändern
+              <Button 
+                onClick={() => setShowPricing(!showPricing)}
+                className="bg-white text-slate-900 hover:bg-slate-100 font-bold px-8 shadow-xl shadow-white/5 no-print"
+              >
+                {showPricing ? 'Abbrechen' : 'Plan ändern'}
               </Button>
             </div>
+
+            {showPricing && (
+              <div className="mt-8 animate-in slide-in-from-top-4 duration-500">
+                <PricingSection />
+              </div>
+            )}
           </CardContent>
         </Card>
 

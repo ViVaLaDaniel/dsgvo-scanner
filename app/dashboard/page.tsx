@@ -121,7 +121,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-3xl font-black text-slate-900">{stats.websitesCount} / {stats.websiteLimit}</div>
             <p className="text-xs text-slate-400 mt-2 font-semibold">
-              <span className="text-blue-600">Aktiv</span> в вашем плане
+              <span className="text-blue-600">Aktiv</span> in Ihrem Plan
             </p>
           </CardContent>
         </Card>
@@ -243,7 +243,7 @@ export default function DashboardPage() {
               <ShieldCheck className="h-5 w-5 text-blue-400" />
               Sicherheits-Feed
             </CardTitle>
-            <CardDescription className="text-slate-400">Aktuelle Abмаhn-Gefahren</CardDescription>
+            <CardDescription className="text-slate-400">Aktuelle Abmahn-Gefahren</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-2 group cursor-pointer hover:bg-white/10 transition-colors">

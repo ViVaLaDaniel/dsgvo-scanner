@@ -30,7 +30,7 @@ export default function LoginPage() {
     });
 
     if (loginError) {
-      setError('E-Mail или Passwort ist falsch');
+      setError('E-Mail oder Passwort ist falsch');
       setLoading(false);
       return;
     }

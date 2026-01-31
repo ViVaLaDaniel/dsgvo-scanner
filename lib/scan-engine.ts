@@ -41,7 +41,7 @@ export const SCAN_PATTERNS = {
       title: 'Google Tag Manager',
       status: 'violation',
       severity: 'high',
-      description_de: 'GTM wird без vorherige Einwilligung des Nutzers geladen.',
+      description_de: 'GTM wird ohne vorherige Einwilligung des Nutzers geladen.',
       recommendation_de: 'Stellen Sie sicher, dass das GTM-Skript erst nach der Einwilligung im Cookie-Banner gefeuert wird.',
       impact_de: 'Verstoß gegen TDDDG & DSGVO.'
     }
@@ -194,11 +194,11 @@ export async function analyzeWebsite(url: string): Promise<ScanResult> {
     if (cookies.length > 0) {
       findings.push({
         category: 'Cookies',
-        title: 'Cookies обнаружены до согласия',
+        title: 'Cookies vor Einwilligung erkannt',
         status: 'warning',
         severity: 'medium',
-        description_de: `На сайте обнаружено ${cookies.length} куки до того, как пользователь дал согласие.`,
-        recommendation_de: 'Убедитесь, что все нетехнические куки блокируются до получения явного согласия через баннер.',
+        description_de: `Es wurden ${cookies.length} Cookies erkannt, bevor der Nutzer seine Einwilligung gegeben hat.`,
+        recommendation_de: 'Stellen Sie sicher, dass alle nicht notwendigen Cookies blockiert werden, bis eine ausdrückliche Einwilligung über das Cookie-Banner erfolgt.',
         technical_details: { count: cookies.length, names: cookies.map(c => c.name) }
       } as Finding);
     }
