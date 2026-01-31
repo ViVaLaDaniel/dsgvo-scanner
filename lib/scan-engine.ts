@@ -129,11 +129,18 @@ export async function analyzeWebsite(url: string): Promise<ScanResult> {
   let browser;
   try {
     // 1. Launch Browser
-    // Note: In production (Vercel), we might need an external browser endpoint
-    browser = await chromium.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    // Note: In production (Vercel), we MUST use an external browser endpoint
+    // because Vercel Serverless Functions do not include Chromium.
+    const wsEndpoint = process.env.BROWSER_WSE_ENDPOINT;
+
+    if (wsEndpoint) {
+      browser = await chromium.connectOverCDP(wsEndpoint);
+    } else {
+      browser = await chromium.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+    }
 
     const context = await browser.newContext({
       userAgent: 'Germani DSGVO Scanner/1.0 (Mozilla/5.0 Compliance Check)',

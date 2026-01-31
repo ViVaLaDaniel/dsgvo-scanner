@@ -120,6 +120,12 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-black text-slate-900">{stats.websitesCount} / {stats.websiteLimit}</div>
+            <div className="mt-3 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+               <div className={cn(
+                 "h-full rounded-full transition-all duration-1000",
+                 (stats.websitesCount / stats.websiteLimit) > 0.9 ? "bg-red-500" : "bg-blue-600"
+               )} style={{ width: `${Math.min(100, (stats.websitesCount / stats.websiteLimit) * 100)}%` }} />
+            </div>
             <p className="text-xs text-slate-400 mt-2 font-semibold">
               <span className="text-blue-600">Aktiv</span> in Ihrem Plan
             </p>

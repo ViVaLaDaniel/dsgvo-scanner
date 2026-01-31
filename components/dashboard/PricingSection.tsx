@@ -31,7 +31,7 @@ const PLANS = [
     name: 'Business',
     priceId: 'pri_01kgawx9m0d9zd3znpw7003abb',
     price: '399€',
-    description: 'Für большие Kanzleien.',
+    description: 'Für große Kanzleien.',
     features: ['200 Websites', 'Dedicated Account Manager', 'Individuelle Anpassungen'],
     icon: Building,
     color: 'slate'

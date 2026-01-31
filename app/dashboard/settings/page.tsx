@@ -165,7 +165,7 @@ export default function SettingsPage() {
 
                 {/* Report Footer */}
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Bericht-Fußзеile</label>
+                  <label className="text-sm font-bold text-slate-700">Bericht-Fußzeile</label>
                   <Input 
                     placeholder="Eigener Text im Footer..."
                     value={branding.report_footer || ''}

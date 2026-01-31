@@ -39,7 +39,7 @@ export default function DatenschutzPage() {
             <section>
               <h3 className="text-xl font-bold text-slate-900 mb-4">2. Hosting und Server</h3>
               <p className="text-slate-600 leading-relaxed">
-                Unsere Server befinden sich ausschließlich in Deutschland (Region Frankfurt, Vercel/Supabase), что гарантирует высочайший уровень защиты данных.
+                Unsere Server befinden sich ausschließlich in Deutschland (Region Frankfurt, Vercel/Supabase), was ein höchstmögliches Maß an Datensicherheit garantiert.
               </p>
               <p className="text-slate-600 font-bold mt-4">Genutzte Dienste (Sub-processors):</p>
               <ul className="list-disc list-inside text-slate-600 space-y-1">
