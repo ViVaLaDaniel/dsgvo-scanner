@@ -25,20 +25,20 @@ export function DownloadReportButton({ scanId, variant = 'outline', className }:
     try {
       // 1. Fetch Scan
       const { data: scan } = await supabase.from('scans').select('*').eq('id', scanId).single();
-      if (!scan) throw new Error('Scan не найден');
+      if (!scan) throw new Error('Scan nicht gefunden');
 
       // 2. Fetch Website
       const { data: website } = await supabase.from('websites').select('*').eq('id', scan.website_id).single();
-      if (!website) throw new Error('Website не найден');
+      if (!website) throw new Error('Website nicht gefunden');
 
       // 3. Fetch Agency
       const { data: agency } = await supabase.from('agencies').select('*').eq('owner_id', website.owner_id).single();
-      if (!agency) throw new Error('Agency настройки не найдены');
+      if (!agency) throw new Error('Agentur-Einstellungen nicht gefunden');
 
       setData({ scan, website, agency });
-    } catch (err) {
+    } catch (err: any) {
       console.error('Download Error:', err);
-      alert('Ошибка при подготовке отчета');
+      alert('Fehler bei der Vorbereitung des Berichts: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -50,10 +50,10 @@ export function DownloadReportButton({ scanId, variant = 'outline', className }:
         variant={variant} 
         size="sm" 
         onClick={prepareData} 
-        disabled={loading}
+        isLoading={loading}
         className={className}
       >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4 mr-2" />}
+        {!loading && <FileDown className="h-4 w-4 mr-2" />}
         PDF Report
       </Button>
     );
@@ -65,8 +65,8 @@ export function DownloadReportButton({ scanId, variant = 'outline', className }:
       fileName={`DSGVO-Report-${data.website.domain}.pdf`}
     >
       {({ loading: pdfLoading }) => (
-        <Button variant={variant} size="sm" disabled={pdfLoading} className={className}>
-          {pdfLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4 mr-2" />}
+        <Button variant={variant} size="sm" isLoading={pdfLoading} className={className}>
+          {!pdfLoading && <FileDown className="h-4 w-4 mr-2" />}
           {pdfLoading ? 'Generiere...' : 'Download PDF'}
         </Button>
       )}
