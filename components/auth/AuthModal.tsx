@@ -127,7 +127,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
               </div>
               <h3 className="text-2xl font-black text-slate-900">Anfrage gesendet!</h3>
               <p className="text-slate-500 font-medium max-w-xs">
-                Vielen Dank! Wir haben Ihre Daten erhalten и werden Ihnen die Zugangsdaten in Kürze per E-Mail zusenden.
+                Vielen Dank! Wir haben Ihre Daten erhalten und werden Ihnen die Zugangsdaten in Kürze per E-Mail zusenden.
               </p>
             </motion.div>
           ) : (
@@ -228,7 +228,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
         {!isSubmitted && (
           <p className="text-center text-xs text-slate-400 font-medium">
             Mit Absenden akzeptieren Sie unsere <br />
-            <a href="/agb" className="text-blue-500 hover:underline">AGB</a> и <a href="/datenschutz" className="text-blue-500 hover:underline">Datenschutzerklärung</a>.
+            <a href="/agb" className="text-blue-500 hover:underline">AGB</a> und <a href="/datenschutz" className="text-blue-500 hover:underline">Datenschutzerklärung</a>.
           </p>
         )}
       </div>

@@ -37,7 +37,7 @@ export default function WebsitesPage() {
   });
 
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [scanningId, setScanningId] = useState<string | null>(null);
   const router = useRouter();
   const [supabase] = useState(() => createClient());
@@ -48,49 +48,64 @@ export default function WebsitesPage() {
     loadData();
   }, []);
 
-  const loadData = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+  const loadData = async (silent = false) => {
+    try {
+      if (!silent) setIsLoadingData(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    // Load profile
-    const { data: profileData } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+      // Parallel fetching for performance
+      const [
+        { data: profileData },
+        { data: websitesData }
+      ] = await Promise.all([
+        supabase.from('user_profiles').select('*').eq('id', user.id).single(),
+        supabase.from('websites').select('*').order('created_at', { ascending: false })
+      ]);
 
-    if (profileData) setProfile(profileData);
-
-    // Load websites
-    const { data: websitesData } = await supabase
-      .from('websites')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (websitesData) {
-      setWebsites(websitesData);
+      if (profileData) setProfile(profileData);
       
-      // Load latest scans for these websites
-      const websiteIds = websitesData.map(w => w.id);
-      if (websiteIds.length > 0) {
-        const { data: scansData } = await supabase
-          .from('scans')
-          .select('*')
-          .in('website_id', websiteIds)
-          .order('created_at', { ascending: false });
+      if (websitesData) {
+        setWebsites(websitesData);
+        
+        // Load latest scans
+        const websiteIds = websitesData.map(w => w.id);
+        if (websiteIds.length > 0) {
+          const { data: scansData } = await supabase
+            .from('scans')
+            .select('*')
+            .in('website_id', websiteIds)
+            .order('created_at', { ascending: false });
 
-        if (scansData) {
-          // Keep only the latest scan per website
-          const latestScans = websitesData.map(w => {
-            const scan = scansData.find(s => s.website_id === w.id);
-            return scan ? { ...scan, website_id: w.id } : null;
-          }).filter(Boolean);
-          
-          setSavedScans(latestScans);
+          if (scansData) {
+            // Check if any scan is still 'scanning' in DB
+            const isAnyScanning = scansData.some(s => s.status === 'scanning' || s.status === 'processing');
+            if (isAnyScanning) {
+              // We'll let the interval handle the refresh
+            }
+
+            const latestScansMap = websitesData.map(w => {
+              const scan = scansData.find(s => s.website_id === w.id);
+              return scan ? { ...scan, website_id: w.id } : null;
+            }).filter(Boolean);
+            
+            setSavedScans(latestScansMap);
+          }
         }
       }
+    } catch (err) {
+      console.error('Data Load Error:', err);
+    } finally {
+      setIsLoadingData(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+    // Live Polling every 10 seconds to detect finished scans
+    const poll = setInterval(() => loadData(true), 10000);
+    return () => clearInterval(poll);
+  }, []);
 
   const onSubmit = async (values: WebsiteFormValues) => {
     setError('');
@@ -183,6 +198,7 @@ export default function WebsitesPage() {
         </div>
         <Button 
           onClick={() => setShowAddForm(!showAddForm)}
+          aria-label={showAddForm ? 'Hinzufügen abbrechen' : 'Website hinzufügen'}
           className={cn("font-bold shadow-lg transition-all", showAddForm ? "bg-slate-800" : "shadow-blue-500/20")}
         >
           <Plus className={cn("h-4 w-4 mr-2 transition-transform", showAddForm && "rotate-45")} />
@@ -241,7 +257,20 @@ export default function WebsitesPage() {
 
       {/* Websites List */}
       <div className="grid gap-6 md:grid-cols-1 overflow-hidden">
-        {websites.length === 0 ? (
+        {isLoadingData ? (
+          Array(2).fill(0).map((_, i) => (
+            <Card key={i} className="animate-pulse border-slate-100 p-6">
+              <div className="flex items-center gap-6">
+                <div className="h-14 w-14 bg-slate-100 rounded-2xl" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-5 w-48 bg-slate-100 rounded" />
+                  <div className="h-4 w-32 bg-slate-50 rounded" />
+                </div>
+                <div className="h-10 w-32 bg-slate-100 rounded-lg" />
+              </div>
+            </Card>
+          ))
+        ) : websites.length === 0 ? (
           <Card className="border-dashed border-2 border-slate-200 bg-slate-50/50">
             <CardContent className="text-center py-20">
               <div className="bg-slate-200 p-4 rounded-full w-fit mx-auto mb-4">
@@ -320,6 +349,7 @@ export default function WebsitesPage() {
                       <Button 
                         size="sm" 
                         variant={scanResult ? "outline" : "default"}
+                        aria-label={scanResult ? 'Bericht anzeigen' : 'Jetzt scannen'}
                         onClick={(e) => {
                           e.stopPropagation();
                           handleScanNow(website.id, !!scanResult);
@@ -352,6 +382,7 @@ export default function WebsitesPage() {
                       <Button 
                         size="sm" 
                         variant="ghost"
+                        aria-label="Website löschen"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDelete(website.id);

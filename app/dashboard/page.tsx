@@ -31,8 +31,13 @@ export default function DashboardPage() {
   const [supabase] = useState(() => createClient());
   const router = useRouter();
 
-  useEffect(() => {
-    async function loadDashboardData() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  async function loadDashboardData() {
+    try {
+      if (isLoading === false) {
+        // Only show spinner on first load
+      }
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -42,53 +47,48 @@ export default function DashboardPage() {
         { count: websitesCount },
         { data: scans }
       ] = await Promise.all([
-        // 1. Load Profile for limit
-        supabase
-          .from('user_profiles')
-          .select('website_limit')
-          .eq('id', user.id)
-          .single(),
-
-        // 2. Load Websites count
-        supabase
-          .from('websites')
-          .select('*', { count: 'exact', head: true }),
-
-        // 3. Load Recent Scans with website info
-        supabase
-          .from('scans')
-          .select(`
-            id,
-            status,
-            violations_count,
-            created_at,
-            website:websites(client_name, url)
-          `)
+        supabase.from('user_profiles').select('website_limit').eq('id', user.id).single(),
+        supabase.from('websites').select('*', { count: 'exact', head: true }),
+        supabase.from('scans')
+          .select(`id, status, violations_count, created_at, risk_score, website:websites(client_name, url)`)
           .order('created_at', { ascending: false })
-          .limit(5)
+          .limit(10) // Fetch more for calculations
       ]);
+
+      const critical = scans?.filter(s => (s.risk_score || 0) < 50).length || 0;
+      const totalScore = scans?.reduce((acc, s) => acc + (s.risk_score || 0), 0) || 0;
+      const avg = scans && scans.length > 0 ? Math.round(totalScore / scans.length) : 100;
 
       setStats({
         websitesCount: websitesCount || 0,
         websiteLimit: profile?.website_limit || 10,
-        criticalCount: 0, // In production, calculate from DB
-        avgScore: 92 // Placeholder
+        criticalCount: critical,
+        avgScore: avg
       });
 
       if (scans) {
-        setRecentScans(scans.map((s: any) => ({
+        setRecentScans(scans.slice(0, 5).map((s: any) => ({
           id: s.id,
           name: s.website?.client_name || 'Unbekannt',
           url: s.website?.url?.replace('https://', '')?.replace('http://', '') || '',
           date: new Date(s.created_at).toLocaleDateString('de-DE'),
-          status: s.violations_count > 0 ? 'Kritisch' : 'Sicher',
+          status: s.risk_score < 50 ? 'Kritisch' : s.risk_score < 85 ? 'Warnung' : 'Sicher',
           violations: s.violations_count,
-          risk: s.violations_count > 0 ? 'high' : 'safe'
+          risk: s.risk_score < 50 ? 'high' : s.risk_score < 85 ? 'warning' : 'safe'
         })));
       }
+    } catch (err) {
+      console.error('Failed to load dashboard data:', err);
+    } finally {
+      setIsLoading(false);
     }
+  }
 
+  useEffect(() => {
     loadDashboardData();
+    // Auto-refresh every 60 seconds
+    const interval = setInterval(loadDashboardData, 60000);
+    return () => clearInterval(interval);
   }, [supabase]);
 
   return (
@@ -111,57 +111,74 @@ export default function DashboardPage() {
 
       {/* Stats Overview */}
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-blue-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest">Websites</CardTitle>
-            <div className="p-2 bg-blue-50 rounded-lg">
-               <Globe className="h-5 w-5 text-blue-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-slate-900">{stats.websitesCount} / {stats.websiteLimit}</div>
-            <div className="mt-3 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-               <div className={cn(
-                 "h-full rounded-full transition-all duration-1000",
-                 (stats.websitesCount / stats.websiteLimit) > 0.9 ? "bg-red-500" : "bg-blue-600"
-               )} style={{ width: `${Math.min(100, (stats.websitesCount / stats.websiteLimit) * 100)}%` }} />
-            </div>
-            <p className="text-xs text-slate-400 mt-2 font-semibold">
-              <span className="text-blue-600">Aktiv</span> in Ihrem Plan
-            </p>
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          Array(3).fill(0).map((_, i) => (
+            <Card key={i} className="animate-pulse border-slate-200">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <div className="h-4 w-24 bg-slate-100 rounded" />
+                <div className="h-8 w-8 bg-slate-50 rounded-lg" />
+              </CardHeader>
+              <CardContent>
+                <div className="h-10 w-32 bg-slate-100 rounded mb-4" />
+                <div className="h-2 w-full bg-slate-50 rounded" />
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <>
+            <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-blue-100">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest">Websites</CardTitle>
+                <div className="p-2 bg-blue-50 rounded-lg">
+                   <Globe className="h-5 w-5 text-blue-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-black text-slate-900">{stats.websitesCount} / {stats.websiteLimit}</div>
+                <div className="mt-3 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                   <div className={cn(
+                     "h-full rounded-full transition-all duration-1000",
+                     (stats.websitesCount / stats.websiteLimit) > 0.9 ? "bg-red-500" : "bg-blue-600"
+                   )} style={{ width: `${Math.min(100, (stats.websitesCount / stats.websiteLimit) * 100)}%` }} />
+                </div>
+                <p className="text-xs text-slate-400 mt-2 font-semibold">
+                  <span className="text-blue-600">Aktiv</span> in Ihrem Plan
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-red-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest">Kritische Funde</CardTitle>
-            <div className="p-2 bg-red-50 rounded-lg">
-               <AlertTriangle className="h-5 w-5 text-red-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-red-600">{stats.criticalCount}</div>
-            <p className="text-xs text-slate-400 mt-2 font-semibold flex items-center gap-1">
-              <TrendingDown className="h-3 w-3 text-green-600" />
-              <span className="text-green-600">-0%</span> gegenüber Vorwoche
-            </p>
-          </CardContent>
-        </Card>
+            <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-red-100">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest">Kritische Funde</CardTitle>
+                <div className="p-2 bg-red-50 rounded-lg">
+                   <AlertTriangle className="h-5 w-5 text-red-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-black text-red-600">{stats.criticalCount}</div>
+                <p className="text-xs text-slate-400 mt-2 font-semibold flex items-center gap-1">
+                  <TrendingDown className="h-3 w-3 text-green-600" />
+                  <span className="text-green-600">-0%</span> gegenüber Vorwoche
+                </p>
+              </CardContent>
+            </Card>
 
-        <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-green-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest">DSGVO Score</CardTitle>
-            <div className="p-2 bg-green-50 rounded-lg">
-               <ShieldCheck className="h-5 w-5 text-green-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-black text-slate-900">{stats.avgScore}/100</div>
-            <div className="mt-3 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-               <div className="h-full bg-green-500 rounded-full" style={{ width: `${stats.avgScore}%` }} />
-            </div>
-          </CardContent>
-        </Card>
+            <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-green-100">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest">DSGVO Score</CardTitle>
+                <div className="p-2 bg-green-50 rounded-lg">
+                   <ShieldCheck className="h-5 w-5 text-green-600" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-black text-slate-900">{stats.avgScore}/100</div>
+                <div className="mt-3 h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                   <div className="h-full bg-green-500 rounded-full" style={{ width: `${stats.avgScore}%` }} />
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </div>
 
       {/* Main Grid: Recent Activity & Critical Issues */}

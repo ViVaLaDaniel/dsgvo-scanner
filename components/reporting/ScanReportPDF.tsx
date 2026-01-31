@@ -130,11 +130,8 @@ export const ScanReportPDF: React.FC<Props> = ({ scan, website, agency }) => {
   const brandColor = agency.brand_color || '#2563eb';
   
   // Helpers for results
-  const results = scan.results || {};
-  const findings = Object.entries(results).map(([key, value]) => ({
-    key,
-    ...value
-  }));
+  const results = (scan.results as any) || {};
+  const findingsList = Array.isArray(results.findings) ? results.findings : [];
 
   return (
     <Document>
@@ -167,18 +164,18 @@ export const ScanReportPDF: React.FC<Props> = ({ scan, website, agency }) => {
         <View style={styles.section}>
           <Text style={[styles.sectionHeader, { borderLeftColor: brandColor }]}>Audit-Ergebnisse</Text>
           
-          {findings.map((f: any) => (
-            <View key={f.key} style={styles.findingCard}>
+          {findingsList.map((f: any, idx: number) => (
+            <View key={idx} style={styles.findingCard}>
               <View style={styles.findingHeader}>
-                <Text style={styles.findingTitle}>{f.key.replace('_', ' ').toUpperCase()}</Text>
+                <Text style={styles.findingTitle}>{f.title || f.category}</Text>
                 <Text style={[
                   styles.findingStatus, 
                   { 
-                    backgroundColor: f.status === 'compliant' ? '#dcfce7' : f.status === 'warning' ? '#fef9c3' : '#fee2e2',
-                    color: f.status === 'compliant' ? '#166534' : f.status === 'warning' ? '#854d0e' : '#991b1b'
+                    backgroundColor: f.status === 'compliant' ? '#dcfce7' : f.severity === 'high' ? '#fee2e2' : '#fef9c3',
+                    color: f.status === 'compliant' ? '#166534' : f.severity === 'high' ? '#991b1b' : '#854d0e'
                   }
                 ]}>
-                  {f.status.toUpperCase()}
+                  {(f.status || 'VIOLATION').toUpperCase()}
                 </Text>
               </View>
               <Text style={styles.findingDesc}>{f.description_de}</Text>
