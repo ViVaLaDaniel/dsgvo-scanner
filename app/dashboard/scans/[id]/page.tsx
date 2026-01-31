@@ -129,6 +129,8 @@ export default function ScanResultPage() {
 
   const handleShareReport = () => {
     navigator.clipboard.writeText(window.location.href);
+    // CodeRabbit Suggestion: Use a less intrusive notification if available, 
+    // but for now keeping alert as a fallback for the prototype.
     alert('Link zum Bericht wurde in die Zwischenablage kopiert! 🔗');
   };
 
@@ -393,21 +395,23 @@ export default function ScanResultPage() {
                 <CardContent className="p-0">
                   <div className="flex flex-col md:flex-row">
                     <div className={cn(
-                      "w-full md:w-48 p-6 flex flex-col items-center justify-center text-center gap-2 border-b md:border-b-0 md:border-r print:bg-slate-50",
+                      "w-full md:w-40 p-4 md:p-6 flex flex-row md:flex-col items-center justify-start md:justify-center text-left md:text-center gap-4 md:gap-2 border-b md:border-b-0 md:border-r print:bg-slate-50",
                       finding.severity === 'High' ? "bg-red-50/50" : finding.severity === 'Medium' ? "bg-amber-50/50" : "bg-blue-50/50"
                     )}>
                       <div className={cn(
-                        "p-3 rounded-2xl",
+                        "p-2 md:p-3 rounded-xl md:rounded-2xl",
                         finding.severity === 'High' ? "bg-red-100 text-red-600" : finding.severity === 'Medium' ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"
-                      )}>
-                        {finding.severity === 'High' ? <AlertCircle className="h-6 w-6" /> : finding.severity === 'Medium' ? <AlertCircle className="h-6 w-6" /> : <Info className="h-6 w-6" />}
+                      )} aria-hidden="true">
+                        {finding.severity === 'High' ? <AlertCircle className="h-5 w-5 md:h-6 md:w-6" /> : finding.severity === 'Medium' ? <AlertCircle className="h-5 w-5 md:h-6 md:w-6" /> : <Info className="h-5 w-5 md:h-6 md:w-6" />}
                       </div>
-                      <span className={cn(
-                        "text-[10px] font-black uppercase tracking-widest",
-                        finding.severity === 'High' ? "text-red-600" : finding.severity === 'Medium' ? "text-amber-600" : "text-blue-600"
-                      )}>
-                        {finding.severity}-Risk
-                      </span>
+                      <div className="flex flex-col md:items-center">
+                        <span className={cn(
+                          "text-[10px] font-black uppercase tracking-widest",
+                          finding.severity === 'High' ? "text-red-600" : finding.severity === 'Medium' ? "text-amber-600" : "text-blue-600"
+                        )}>
+                          {finding.severity}-Risk
+                        </span>
+                      </div>
                     </div>
                     <div className="flex-1 p-6 md:p-8 space-y-6">
                       <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
