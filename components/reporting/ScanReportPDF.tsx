@@ -142,7 +142,7 @@ export const ScanReportPDF: React.FC<Props> = ({ scan, website, agency }) => {
         {/* Header */}
         <View style={styles.header}>
           {agency.logo_url ? (
-            <Image src={agency.logo_url} style={styles.logo} />
+            <Image src={agency.logo_url} style={styles.logo} alt="Agentur Logo" />
           ) : (
             <Text style={{ fontSize: 18, fontWeight: 'bold', color: brandColor }}>{agency.name}</Text>
           )}
@@ -192,7 +192,7 @@ export const ScanReportPDF: React.FC<Props> = ({ scan, website, agency }) => {
         {/* Legal Disclaimer */}
         <View style={{ marginTop: 20, padding: 10, backgroundColor: '#f1f5f9', borderRadius: 6 }}>
           <Text style={{ fontSize: 8, color: '#64748b' }}>
-            Haftungsausschluss: Dieser Bericht dient nur zu Informationszwecken и stellt keine Rechtsberatung dar. 
+            Haftungsausschluss: Dieser Bericht dient nur zu Informationszwecken und stellt keine Rechtsberatung dar.
             Bitte konsultieren Sie einen qualifizierten Datenschutzbeauftragten oder Rechtsanwalt.
           </Text>
         </View>
