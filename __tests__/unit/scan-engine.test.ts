@@ -75,9 +75,9 @@ describe('Scan Engine (Unit)', () => {
     expect(result.findings.length).toBe(0);
   });
 
-  it('should throw error if browser fails to load page', async () => {
-    mockPage.goto.mockRejectedValue(new Error('Page load failed'));
+  it('should throw error if browser launch fails', async () => {
+    (chromium.launch as any).mockRejectedValue(new Error('Browser launch failed'));
 
-    await expect(analyzeWebsite('https://fail-site.com')).rejects.toThrow('Page load failed');
+    await expect(analyzeWebsite('https://fail-site.com')).rejects.toThrow('Browser launch failed');
   });
 });
