@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Shield, User, Building, CreditCard, Save } from 'lucide-react';
+import { Shield, User, Building, CreditCard, Save, Upload, X, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { UserProfile, Agency } from '@/types/supabase';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,7 @@ export default function SettingsPage() {
     report_footer: 'Professionelles DSGVO-Monitoring'
   });
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [supabase] = useState(() => createClient());
 
@@ -51,6 +52,47 @@ export default function SettingsPage() {
     }
     loadData();
   }, [supabase]);
+
+  const handleUploadLogo = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validation
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Datei ist zu groß. Maximum ist 2MB.');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Nicht authentifiziert');
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/logo-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      // 1. Upload to Storage
+      const { error: uploadError } = await supabase.storage
+        .from('agency-logos')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // 2. Get Public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('agency-logos')
+        .getPublicUrl(filePath);
+
+      setBranding(prev => ({ ...prev, logo_url: publicUrl }));
+      
+    } catch (err: any) {
+      console.error('Upload Error:', err);
+      alert('Fehler beim Hochladen: ' + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -150,17 +192,54 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="pt-6 space-y-8">
             <div className="grid gap-8 md:grid-cols-2">
-              {/* Logo URL */}
-              <div className="space-y-4 text-nowrap">
+              {/* Logo Upload Section */}
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700">Logo-URL (für Berichte)</label>
-                  <Input 
-                    placeholder="https://ihre-website.de/logo.png"
-                    value={branding.logo_url || ''}
-                    onChange={(e) => setBranding({ ...branding, logo_url: e.target.value })}
-                    className="bg-white border-slate-200"
-                  />
-                  <p className="text-[10px] text-slate-400 font-medium italic">Empfohlen: Transparentes PNG, ca. 400x120px</p>
+                  <label className="text-sm font-bold text-slate-700">Agentur-Logo</label>
+                  
+                  <div className="flex flex-col gap-4">
+                    {branding.logo_url ? (
+                      <div className="relative group w-fit">
+                        <div className="h-24 px-6 py-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm overflow-hidden min-w-[200px]">
+                          <img 
+                            src={branding.logo_url} 
+                            alt="Agency Logo" 
+                            className="max-h-full max-w-full object-contain"
+                          />
+                        </div>
+                        <button 
+                          onClick={() => setBranding({ ...branding, logo_url: '' })}
+                          className="absolute -top-2 -right-2 p-1.5 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors shadow-sm opacity-0 group-hover:opacity-100"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div 
+                        onClick={() => document.getElementById('logo-upload')?.click()}
+                        className="h-24 px-6 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-blue-300 hover:bg-blue-50/30 transition-all group"
+                      >
+                        {uploading ? (
+                          <Loader2 className="h-6 w-6 text-blue-500 animate-spin" />
+                        ) : (
+                          <Upload className="h-6 w-6 text-slate-400 group-hover:text-blue-500" />
+                        )}
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-600">
+                          {uploading ? 'Wird hochgeladen...' : 'Logo hochladen'}
+                        </p>
+                      </div>
+                    )}
+                    
+                    <input 
+                      id="logo-upload"
+                      type="file" 
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleUploadLogo}
+                      disabled={uploading}
+                    />
+                  </div>
+                  <p className="text-[10px] text-slate-400 font-medium italic">Empfohlen: Transparentes PNG oder SVG, max 2MB.</p>
                 </div>
 
                 {/* Report Footer */}
