@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,84 +14,17 @@ import {
   TrendingDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { createClient } from '@/lib/supabase/client';
-import { Website, Scan } from '@/types/supabase';
 import Link from 'next/link';
 import { DownloadReportButton } from '@/components/reporting/DownloadReportButton';
+import { useDashboard } from '@/lib/hooks/useDashboard';
+import { RiskTrendChart } from '@/components/dashboard/RiskTrendChart';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({
-    websitesCount: 0,
-    websiteLimit: 10,
-    criticalCount: 0,
-    avgScore: 0
-  });
-  const [recentScans, setRecentScans] = useState<any[]>([]);
-  const [supabase] = useState(() => createClient());
   const router = useRouter();
-
-  const [isLoading, setIsLoading] = useState(true);
-
-  async function loadDashboardData() {
-    try {
-      if (isLoading === false) {
-        // Only show spinner on first load
-      }
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      // Load all data in parallel for performance
-      const [
-        { data: profile },
-        { count: websitesCount },
-        { data: scans }
-      ] = await Promise.all([
-        supabase.from('user_profiles').select('website_limit').eq('id', user.id).single(),
-        supabase.from('websites').select('*', { count: 'exact', head: true }),
-        supabase.from('scans')
-          .select(`id, status, violations_count, created_at, risk_score, website:websites(client_name, url)`)
-          .order('created_at', { ascending: false })
-          .limit(10) // Fetch more for calculations
-      ]);
-
-      const critical = scans?.filter(s => (s.risk_score || 0) < 50).length || 0;
-      const totalScore = scans?.reduce((acc, s) => acc + (s.risk_score || 0), 0) || 0;
-      const avg = scans && scans.length > 0 ? Math.round(totalScore / scans.length) : 100;
-
-      setStats({
-        websitesCount: websitesCount || 0,
-        websiteLimit: profile?.website_limit || 10,
-        criticalCount: critical,
-        avgScore: avg
-      });
-
-      if (scans) {
-        setRecentScans(scans.slice(0, 5).map((s: any) => ({
-          id: s.id,
-          name: s.website?.client_name || 'Unbekannt',
-          url: s.website?.url?.replace('https://', '')?.replace('http://', '') || '',
-          date: new Date(s.created_at).toLocaleDateString('de-DE'),
-          status: s.risk_score < 50 ? 'Kritisch' : s.risk_score < 85 ? 'Warnung' : 'Sicher',
-          violations: s.violations_count,
-          risk: s.risk_score < 50 ? 'high' : s.risk_score < 85 ? 'warning' : 'safe'
-        })));
-      }
-    } catch (err) {
-      console.error('Failed to load dashboard data:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadDashboardData();
-    // Auto-refresh every 60 seconds
-    const interval = setInterval(loadDashboardData, 60000);
-    return () => clearInterval(interval);
-  }, [supabase]);
+  const { stats, recentScans, trendData, isLoading } = useDashboard();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -113,23 +45,14 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-3">
         {isLoading ? (
           Array(3).fill(0).map((_, i) => (
-            <Card key={i} className="animate-pulse border-slate-200">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div className="h-4 w-24 bg-slate-100 rounded" />
-                <div className="h-8 w-8 bg-slate-50 rounded-lg" />
-              </CardHeader>
-              <CardContent>
-                <div className="h-10 w-32 bg-slate-100 rounded mb-4" />
-                <div className="h-2 w-full bg-slate-50 rounded" />
-              </CardContent>
-            </Card>
+            <Card key={i} className="animate-pulse border-slate-200 h-32" />
           ))
         ) : (
           <>
-            <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-blue-100">
+            <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-blue-100 group">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest">Websites</CardTitle>
-                <div className="p-2 bg-blue-50 rounded-lg">
+                <div className="p-2 bg-blue-50 rounded-lg group-hover:scale-110 transition-transform">
                    <Globe className="h-5 w-5 text-blue-600" />
                 </div>
               </CardHeader>
@@ -147,10 +70,10 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-red-100">
+            <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-red-100 group">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest">Kritische Funde</CardTitle>
-                <div className="p-2 bg-red-50 rounded-lg">
+                <div className="p-2 bg-red-50 rounded-lg group-hover:scale-110 transition-transform">
                    <AlertTriangle className="h-5 w-5 text-red-600" />
                 </div>
               </CardHeader>
@@ -163,10 +86,10 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-green-100">
+            <Card className="shadow-sm border-slate-200 transition-all hover:shadow-md hover:border-green-100 group">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest">DSGVO Score</CardTitle>
-                <div className="p-2 bg-green-50 rounded-lg">
+                <div className="p-2 bg-green-50 rounded-lg group-hover:scale-110 transition-transform">
                    <ShieldCheck className="h-5 w-5 text-green-600" />
                 </div>
               </CardHeader>
@@ -198,7 +121,13 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              {recentScans.length === 0 ? (
+              {isLoading ? (
+                <div className="space-y-4 py-4">
+                  {Array(3).fill(0).map((_, i) => (
+                    <div key={i} className="h-16 w-full bg-slate-50 animate-pulse rounded-xl" />
+                  ))}
+                </div>
+              ) : recentScans.length === 0 ? (
                 <div className="text-center py-10 text-slate-400 font-medium">
                   Noch keine Scans durchgeführt.
                 </div>
@@ -221,8 +150,8 @@ export default function DashboardPage() {
                         className="group hover:bg-slate-50 transition-all cursor-pointer border-transparent hover:border-l-4 hover:border-l-blue-600"
                       >
                         <td className="py-4">
-                          <div className="font-bold text-slate-900 truncate max-w-[180px]">{item.name}</div>
-                          <div className="text-slate-400 text-xs truncate max-w-[180px] flex items-center gap-1.5 group-hover:text-blue-500 transition-colors">
+                          <div className="font-bold text-slate-900 truncate max-w-[180px] group-hover:text-blue-600 transition-colors uppercase tracking-tight">{item.name}</div>
+                          <div className="text-slate-400 text-xs truncate max-w-[180px] flex items-center gap-1.5 transition-colors">
                             {item.url} <ExternalLink className="h-2.5 w-2.5" />
                           </div>
                         </td>
@@ -235,18 +164,17 @@ export default function DashboardPage() {
                             "bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20"
                           )}>
                             {item.risk === 'safe' && <CheckCircle2 className="h-3 w-3" />}
-                            {item.risk === 'high' && <AlertTriangle className="h-3 w-3" />}
-                            {item.risk === 'warning' && <AlertTriangle className="h-3 w-3" />}
+                            {(item.risk === 'high' || item.risk === 'warning') && <AlertTriangle className="h-3 w-3" />}
                             {item.status}
                           </span>
                         </td>
-                        <td className="py-4 text-center" onClick={() => item.id && router.push(`/dashboard/scans/${item.id}`)}>
+                        <td className="py-4 text-center">
                           <span className={cn(
                             "font-black text-lg",
                             item.violations > 0 ? "text-slate-900" : "text-green-600"
                           )}>{item.violations}</span>
                         </td>
-                        <td className="py-4 text-right">
+                        <td className="py-4 text-right" onClick={(e) => e.stopPropagation()}>
                           <DownloadReportButton scanId={item.id} variant="ghost" className="h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50" />
                         </td>
                       </tr>
@@ -258,33 +186,35 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Critical Alerts Sidebar */}
-        <Card className="shadow-sm border-slate-200 bg-slate-900 text-white overflow-hidden relative">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/20 rounded-full -mr-8 -mt-8 blur-3xl" />
+        {/* Risk Analytics Chart */}
+        <Card className="shadow-sm border-slate-200 lg:col-span-1 flex flex-col">
           <CardHeader>
-            <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-blue-400" />
-              Sicherheits-Feed
+            <CardTitle className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <TrendingDown className="h-5 w-5 text-blue-600" />
+              Risiko-Entwicklung
             </CardTitle>
-            <CardDescription className="text-slate-400">Aktuelle Abmahn-Gefahren</CardDescription>
+            <CardDescription className="text-slate-500 font-medium">Durchschnittsscore (7 Tage)</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-2 group cursor-pointer hover:bg-white/10 transition-colors">
-              <p className="text-xs font-bold text-blue-400">KRITISCH</p>
-              <p className="text-sm font-bold leading-snug">Google Fonts: Welle von Abmahnungen in Österreich</p>
-              <p className="text-[10px] text-slate-400 font-medium">Informieren Sie Ihre Mandanten</p>
-            </div>
+          <CardContent className="flex-1 flex flex-col justify-center pb-8">
+            {isLoading ? (
+              <div className="h-[200px] w-full bg-slate-50 animate-pulse rounded-2xl" />
+            ) : (
+              <RiskTrendChart data={trendData} />
+            )}
             
-            <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-2 opacity-70 hover:opacity-100 transition-opacity cursor-pointer">
-              <p className="text-xs font-bold text-amber-500">HINWEIS</p>
-              <p className="text-sm font-bold leading-snug">Consent-Banner Fehler bei vielen Websites erkannt</p>
+            <div className="mt-8 p-4 bg-blue-50/50 rounded-2xl border border-blue-100/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-600 rounded-lg">
+                  <ShieldCheck className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Status</p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {stats.avgScore > 75 ? 'Hervorragend' : stats.avgScore > 50 ? 'Stabil' : 'Kritisch'}
+                  </p>
+                </div>
+              </div>
             </div>
-
-            <Link href="/dashboard/websites" className="block w-full">
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold border-none h-11 shadow-lg shadow-blue-500/20">
-                Details im Scanner ansehen
-              </Button>
-            </Link>
           </CardContent>
         </Card>
       </div>

@@ -163,25 +163,37 @@ export async function analyzeWebsite(url: string): Promise<ScanResult> {
       }
     });
 
-    // 3. Navigate and Wait
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+    // 3. Navigate and Wait (Optimized: 'load' is more reliable than 'networkidle')
+    try {
+      await page.goto(url, { waitUntil: 'load', timeout: 45000 });
+    } catch (e: any) {
+      console.warn(`Navigation timeout or error for ${url}, attempting to proceed with partial content:`, e.message);
+      // Even if it times out, we might have content we can scan
+    }
 
-    // 4. Auto-Scroll to trigger lazy-loaded requests
-    await page.evaluate(async () => {
-      await new Promise<void>((resolve) => {
-        let totalHeight = 0;
-        const distance = 100;
-        const timer = setInterval(() => {
-          const scrollHeight = document.body.scrollHeight;
-          window.scrollBy(0, distance);
-          totalHeight += distance;
-          if (totalHeight >= scrollHeight) {
-            clearInterval(timer);
-            resolve();
-          }
-        }, 100);
-      });
-    });
+    // 4. Auto-Scroll to trigger lazy-loaded requests (Optimized & Faster)
+    try {
+      await Promise.race([
+        page.evaluate(async () => {
+          await new Promise<void>((resolve) => {
+            let totalHeight = 0;
+            const distance = 400; // Increased distance
+            const timer = setInterval(() => {
+              const scrollHeight = document.body.scrollHeight;
+              window.scrollBy(0, distance);
+              totalHeight += distance;
+              if (totalHeight >= scrollHeight || totalHeight > 15000) { // Safety cap at 15k pixels
+                clearInterval(timer);
+                resolve();
+              }
+            }, 50); // Faster interval
+          });
+        }),
+        new Promise(resolve => setTimeout(resolve, 10000)) // 10s max for scrolling
+      ]);
+    } catch (e) {
+      console.warn("Scroll failed or timed out, proceeding anyway");
+    }
 
     // Wait a bit more for dynamic requests after scroll
     await page.waitForTimeout(2000);

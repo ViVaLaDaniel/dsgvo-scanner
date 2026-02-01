@@ -35,6 +35,26 @@ export default function HomePage() {
         onClose={() => setIsDemoOpen(false)} 
       />
       
+      {/* Structured Data (JSON-LD) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "DSGVO Scanner",
+            "operatingSystem": "Web",
+            "applicationCategory": "BusinessApplication",
+            "description": "Automatisierte DSGVO-Audits für Agenturen und Datenschutzbeauftragte.",
+            "offers": {
+              "@type": "Offer",
+              "price": "49.00",
+              "priceCurrency": "EUR"
+            }
+          })
+        }}
+      />
+      
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/70 backdrop-blur-md transition-all">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center max-w-7xl">
@@ -43,11 +63,12 @@ export default function HomePage() {
               <Shield className="h-6 w-6 text-white" />
             </div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              <span className="text-2xl font-bold tracking-tight text-slate-900">
                 DSGVO<span className="text-blue-600">Scanner</span>
-              </h1>
+              </span>
             </div>
           </div>
+          {/* ... resto del header ... */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
             <button 
               onClick={() => scrollTo('features')} 
@@ -90,12 +111,12 @@ export default function HomePage() {
             </span>
             Neu: White-Label Reports für Agenturen
           </div>
-          <h2 className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-8 tracking-tight leading-[1.1]">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 mb-8 tracking-tight leading-[1.1]">
             DSGVO-Monitoring für<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
               externe Datenschutzbeauftragte
             </span>
-          </h2>
+          </h1>
           <p className="text-xl md:text-2xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed">
             Überwachen Sie automatisch 50+ Mandanten-Websites und erhalten Sie 
             sofortige Benachrichtigungen bei DSGVO-Verstößen. Sparen Sie Zeit und minimieren Sie Haftungsrisiken.

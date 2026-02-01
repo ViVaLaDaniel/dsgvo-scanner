@@ -5,178 +5,77 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Shield,
   ShieldAlert, 
-  ShieldCheck, 
   ArrowLeft, 
   ExternalLink, 
   AlertCircle, 
   AlertTriangle,
   CheckCircle2,
   Info,
-  Download
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-
-const MOCK_FINDINGS = [
-  {
-    category: 'Drittanbieter & CDNs',
-    title: 'Google Fonts (Remote)',
-    description: 'Schriftarten werden direkt von Google-Servern (fonts.googleapis.com) geladen. Dabei wird die IP-Adresse des Nutzers in die USA übertragen.',
-    severity: 'High',
-    recommendation: 'Laden Sie die Schriftarten herunter und hosten Sie diese lokal auf Ihrem eigenen Server.',
-    impact: 'Abmahngefahr durch LG München I Urteil (Az. 3 O 191/22).'
-  },
-  {
-    category: 'Maps & Medien',
-    title: 'Google Maps Integration',
-    description: 'Eine interaktive Karte von Google Maps wird geladen, bevor der Nutzer seine Einwilligung gegeben hat.',
-    severity: 'Medium',
-    recommendation: 'Implementieren Sie eine "Zwei-Klick-Lösung" oder binden Sie Karten erst nach expliziter Zustimmung im Consent-Banner ein.',
-    impact: 'Unzulässiger Datentransfer in ein Drittland.'
-  },
-  {
-    category: 'Tracking & Analytics',
-    title: 'Google Tag Manager',
-    description: 'GTM wird ohne vorherige Einwilligung des Nutzers geladen, was das Setzen von Tracking-Cookies ermöglichen kann.',
-    severity: 'High',
-    recommendation: 'Stellen Sie sicher, dass das GTM-Skript erst nach der Einwilligung im Cookie-Banner gefeuert wird.',
-    impact: 'Verstoß gegen TDDDG & DSGVO.'
-  },
-  {
-    category: 'Medien',
-    title: 'YouTube Embeds',
-    description: 'Eingebettete Videos laden Tracker von doubleclick.net, auch wenn das Video noch nicht abgespielt wurde.',
-    severity: 'Low',
-    recommendation: 'Nutzen Sie den "erweiterten Datenschutzmodus" (youtube-nocookie.com) oder binden Sie Videos erst nach Einwilligung ein.',
-    impact: 'Zusätzliche Tracking-Cookies von Google.'
-  }
-];
+import { useState } from 'react';
+import { useScanDetail } from '@/lib/hooks/useScanDetail';
+import { DownloadReportButton } from '@/components/reporting/DownloadReportButton';
+import { SendReportModal } from '@/components/reporting/SendReportModal';
 
 export default function ScanResultPage() {
   const params = useParams();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [scanData, setScanData] = useState<any>(null);
-  const [findings, setFindings] = useState<any[]>([]);
+  const id = params.id as string;
+  const { scan, website, agency, isLoading } = useScanDetail(id);
   const [selectedSolution, setSelectedSolution] = useState<any | null>(null);
-  const [branding, setBranding] = useState({
-    logo_url: '',
-    primary_color: '#2563eb',
-    report_footer: 'Professionelles DSGVO-Monitoring'
-  });
 
-  useEffect(() => {
-    async function loadScanData() {
-      try {
-        setLoading(true);
-        const supabase = createClient();
-        
-        const { data: scan, error: scanError } = await supabase
-          .from('scans')
-          .select('*, website:websites(*)')
-          .eq('id', params.id)
-          .single();
+  const [isCopied, setIsCopied] = useState(false);
 
-        if (scanError || !scan) {
-          console.error('Scan not found:', scanError);
-          return;
-        }
-
-        const dbFindings = (scan.results as any)?.findings || [];
-        setScanData({
-          url: scan.website?.url,
-          client_name: scan.website?.client_name,
-          date: new Date(scan.created_at).toLocaleDateString('de-DE'),
-          score: scan.risk_score,
-          status: scan.risk_score < 50 ? 'Kritisch' : scan.risk_score < 85 ? 'Warnung' : 'Sicher'
-        });
-        setFindings(dbFindings);
-
-        // Fetch Agency branding for the owner of the website
-        const ownerId = scan.website?.owner_id;
-        if (ownerId) {
-          const { data: agencyData } = await supabase
-            .from('agencies')
-            .select('*')
-            .eq('owner_id', ownerId)
-            .single();
-          
-          if (agencyData) {
-            setBranding({
-              logo_url: agencyData.logo_url || '',
-              primary_color: agencyData.brand_color || '#2563eb',
-              report_footer: agencyData.report_footer || 'Professionelles DSGVO-Monitoring'
-            });
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load scan data:', err);
-      } finally {
-        setLoading(false);
+  const handleShareReport = async () => {
+    try {
+      const url = window.location.href;
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        // Fallback for non-secure contexts
+        const textArea = document.createElement("textarea");
+        textArea.value = url;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
       }
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
     }
-
-    loadScanData();
-  }, [params.id]);
-
-
-
-
-
-
-  const handleShareReport = () => {
-    navigator.clipboard.writeText(window.location.href);
-    // CodeRabbit Suggestion: Use a less intrusive notification if available, 
-    // but for now keeping alert as a fallback for the prototype.
-    alert('Link zum Bericht wurde in die Zwischenablage kopiert! 🔗');
   };
 
-  if (loading || !scanData) {
+  if (isLoading || !scan) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center space-y-4">
-          <div className="h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-slate-500 font-bold animate-pulse">Deep-Scan Analyse läuft...</p>
+      <div className="space-y-8 animate-pulse">
+        <div className="flex items-center gap-4">
+          <div className="h-10 w-10 bg-slate-100 rounded-lg" />
+          <div className="h-12 w-64 bg-slate-100 rounded" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card className="md:col-span-2 h-48 border-slate-100" />
+          <Card className="h-48 border-slate-100" />
+        </div>
+        <div className="space-y-6">
+          <div className="h-8 w-48 bg-slate-100 rounded" />
+          {[1, 2].map(i => <Card key={i} className="h-40 border-slate-100" />)}
         </div>
       </div>
     );
   }
 
-  // Use a stable reference for scanData to please the compiler and avoid race conditions
-  const reportData = scanData;
+  const findings = (scan.results as any)?.findings || [];
+  const score = scan.risk_score || 0;
+  const status = score < 50 ? 'Kritisch' : score < 85 ? 'Warnung' : 'Sicher';
+  const brandColor = agency?.brand_color || '#2563eb';
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 relative pb-20">
-      {/* Print-Only Header with Logo */}
-      <div className="print-only mb-12 border-b pb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {branding.logo_url ? (
-              <img src={branding.logo_url} alt="Logo" className="h-12 object-contain" />
-            ) : (
-              <>
-                <div className="bg-blue-600 p-2 rounded-xl" style={{ backgroundColor: branding.primary_color }}>
-                  <Shield className="h-8 w-8 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-black text-slate-900 tracking-tighter">
-                    DSGVO<span style={{ color: branding.primary_color }}>Scan</span>
-                  </h1>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Technologiebericht & Analyse</p>
-                </div>
-              </>
-            )}
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-bold text-slate-900">{reportData?.date}</p>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Bericht ID: {params?.id}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Solution Overlay */}
       {selectedSolution && (
         <div 
@@ -204,28 +103,11 @@ export default function ScanResultPage() {
                 <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
                    Schritt-für-Schritt Anleitung
                 </h4>
-                <div className="space-y-3">
-                  {selectedSolution.solution.steps.map((step: string, i: number) => (
-                    <div key={i} className="flex gap-4 items-start">
-                      <div className="h-6 w-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                        {i + 1}
-                      </div>
-                      <p className="text-slate-600 font-medium leading-relaxed">{step}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">
-                   Code-Beispiel
-                </h4>
-                <div className="bg-slate-900 rounded-xl p-6 text-blue-300 font-mono text-xs leading-relaxed relative group">
-                  <pre className="whitespace-pre-wrap">{selectedSolution.solution.code}</pre>
-                  <Button variant="ghost" size="sm" className="absolute top-2 right-2 text-slate-500 hover:text-white" onClick={() => navigator.clipboard.writeText(selectedSolution.solution.code)}>
-                    Copied
-                  </Button>
-                </div>
+                {selectedSolution.recommendation_de ? (
+                  <p className="text-slate-600 font-medium leading-relaxed">{selectedSolution.recommendation_de}</p>
+                ) : (
+                  <p className="text-slate-400 italic">Keine detaillierte Anleitung verfügbar.</p>
+                )}
               </div>
 
               <div className="bg-amber-50 rounded-xl p-6 border border-amber-100 flex gap-4 items-start">
@@ -234,7 +116,9 @@ export default function ScanResultPage() {
                  </div>
                  <div>
                     <p className="text-sm font-bold text-amber-900">Pro-Tipp vom DSB</p>
-                    <p className="text-sm text-amber-700 font-medium italic mt-1 leading-relaxed">&quot;{selectedSolution.solution.tip}&quot;</p>
+                    <p className="text-sm text-amber-700 font-medium italic mt-1 leading-relaxed">
+                      &quot;Stellen Sie sicher, dass alle externen Ressourcen lokal gehostet werden oder erst nach einer Einwilligung geladen werden.&quot;
+                    </p>
                  </div>
               </div>
               
@@ -252,7 +136,7 @@ export default function ScanResultPage() {
       <div className="no-print bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3 text-amber-800">
         <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
         <p className="text-sm font-medium">
-          <span className="font-bold">Hinweis:</span> Dies ist ein Prototyp. Die Analyse basiert momentan auf vordefinierten Mustern und dient der Demonstration des User Interface. Eine vollständige technische Prüfung erfolgt in der finalen Version.
+          <span className="font-bold">Hinweis:</span> Dies ist ein Prototyp. Die Analyse basiert momentan auf vordefinierten Mustern. Eine vollständige technische Prüfung erfolgt in der finalen Version.
         </p>
       </div>
 
@@ -265,25 +149,27 @@ export default function ScanResultPage() {
           <div>
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">Scan-Bericht</h2>
             <div className="flex items-center gap-2 text-slate-500 font-medium mt-1">
-              <span>{reportData?.client_name}</span>
+              <span>{website?.client_name}</span>
               <span className="text-slate-300">•</span>
               <span className="flex items-center gap-1 text-blue-600 truncate max-w-[300px]">
-                {reportData?.url} <ExternalLink className="h-3 w-3" />
+                {website?.url} <ExternalLink className="h-3 w-3" />
               </span>
             </div>
           </div>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="font-bold gap-2 no-print" onClick={() => window.print()}>
-            <Download className="h-4 w-4" />
-            PDF Export
-          </Button>
+          <DownloadReportButton scanId={id} className="font-bold" />
+          <SendReportModal 
+            scanId={id} 
+            websiteUrl={website?.url || ''} 
+            clientName={website?.client_name || 'Kunde'} 
+          />
           <Button 
-            className="font-bold no-print text-white border-none shadow-lg" 
-            style={{ backgroundColor: branding.primary_color }}
+            className="font-bold no-print text-white border-none shadow-lg transition-all" 
+            style={{ backgroundColor: isCopied ? '#059669' : brandColor }}
             onClick={handleShareReport}
           >
-            Bericht teilen
+            {isCopied ? 'Gekopiert!' : 'Link kopieren'}
           </Button>
         </div>
       </div>
@@ -293,7 +179,7 @@ export default function ScanResultPage() {
         <Card className="md:col-span-2 overflow-hidden border-none shadow-xl shadow-slate-200/50 card">
           <div className={cn(
             "h-2 w-full",
-            (reportData?.score ?? 0) < 50 ? "bg-red-500" : (reportData?.score ?? 0) < 85 ? "bg-amber-500" : "bg-green-500"
+            score < 50 ? "bg-red-500" : score < 85 ? "bg-amber-500" : "bg-green-500"
           )} />
           <CardContent className="p-8">
             <div className="flex flex-col md:flex-row items-center gap-8">
@@ -309,10 +195,10 @@ export default function ScanResultPage() {
                     cy="64"
                   />
                   <circle
-                    style={{ color: branding.primary_color }}
+                    style={{ color: brandColor }}
                     strokeWidth="8"
                     strokeDasharray={364}
-                    strokeDashoffset={364 - (364 * (reportData?.score ?? 0)) / 100}
+                    strokeDashoffset={364 - (364 * score) / 100}
                     strokeLinecap="round"
                     stroke="currentColor"
                     fill="transparent"
@@ -322,7 +208,7 @@ export default function ScanResultPage() {
                   />
                 </svg>
                 <div className="text-center">
-                  <span className="text-4xl font-black text-slate-900">{reportData?.score}</span>
+                  <span className="text-4xl font-black text-slate-900">{score}</span>
                   <span className="text-xs font-bold text-slate-400 block mt-[-4px]">/ 100</span>
                 </div>
               </div>
@@ -330,19 +216,19 @@ export default function ScanResultPage() {
               <div className="space-y-4">
                 <Badge className={cn(
                   "font-black uppercase tracking-widest text-[10px] px-3 py-1",
-                  (reportData?.score ?? 0) < 50 ? "bg-red-100 text-red-700 hover:bg-red-100" : 
-                  (reportData?.score ?? 0) < 85 ? "bg-amber-100 text-amber-700 hover:bg-amber-100" : 
+                  score < 50 ? "bg-red-100 text-red-700 hover:bg-red-100" : 
+                  score < 85 ? "bg-amber-100 text-amber-700 hover:bg-amber-100" : 
                   "bg-green-100 text-green-700 hover:bg-green-100"
                 )}>
-                  Status: {reportData?.status}
+                  Status: {status}
                 </Badge>
                 <h3 className="text-2xl font-bold text-slate-900">
-                  {(reportData?.score ?? 0) >= 90 ? 'Hervorragendes Ergebnis' : 'Verbesserungspotenzial erkannt'}
+                  {score >= 90 ? 'Hervorragendes Ergebnis' : 'Verbesserungspotenzial erkannt'}
                 </h3>
                 <p className="text-slate-600 font-medium leading-relaxed">
                   {findings.length > 0 
-                    ? `Wir haben bei der Überprüfung von ${reportData?.url} ${findings.length} kritische Punkte gefunden. Bitte prüfen Sie die Details unten.`
-                    : `Hervorragend! Wir konnten keine offensichtlichen DSGVO-Verstöße auf ${reportData?.url} feststellen.`}
+                    ? `Wir haben bei der Überprüfung ${findings.length} kritische Punkte gefunden. Bitte prüfen Sie die Details unten.`
+                    : 'Hervorragend! Wir konnten keine offensichtlichen DSGVO-Verstöße feststellen.'}
                 </p>
               </div>
             </div>
@@ -353,29 +239,33 @@ export default function ScanResultPage() {
           <CardHeader>
             <CardTitle className="text-lg font-bold flex items-center gap-2">
               <ShieldAlert className="h-5 w-5 text-amber-500" />
-              Quick Check
+              Service Check
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between py-2 border-b border-white/10">
               <span className="text-sm font-medium text-slate-400">Google Fonts</span>
-              {findings.some(f => f.category === 'Google Fonts' && f.status === 'violation') ? (
+              {findings.some((f: any) => f.title?.includes('Font')) ? (
                 <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-none">GEFAHR</Badge>
               ) : (
                 <Badge className="bg-green-500/20 text-green-400 border-none">OK</Badge>
               )}
             </div>
             <div className="flex items-center justify-between py-2 border-b border-white/10">
-              <span className="text-sm font-medium text-slate-400">Cookie Banner</span>
-              <Badge className="bg-green-500/20 text-green-400 border-none uppercase text-[8px]">ERKANNT</Badge>
+              <span className="text-sm font-medium text-slate-400">Tracker</span>
+              {findings.some((f: any) => f.category === 'Tracking & Analytics') ? (
+                <Badge variant="destructive" className="bg-amber-500/20 text-amber-400 border-none">AKTIV</Badge>
+              ) : (
+                <Badge className="bg-green-500/20 text-green-400 border-none">OK</Badge>
+              )}
             </div>
             <div className="flex items-center justify-between py-2 border-b border-white/10">
-              <span className="text-sm font-medium text-slate-400">Datenschutzerklärung</span>
-              <Badge className="bg-green-500/20 text-green-400 border-none uppercase text-[8px]">OK</Badge>
+              <span className="text-sm font-medium text-slate-400">SSL Status</span>
+              <Badge className="bg-green-500/20 text-green-400 border-none uppercase text-[8px]">GESICHERT</Badge>
             </div>
             <div className="flex items-center justify-between py-2">
-              <span className="text-sm font-medium text-slate-400">SSL Verschlüsselung</span>
-              <Badge className="bg-green-500/20 text-green-400 border-none uppercase text-[8px]">AKTIV</Badge>
+              <span className="text-sm font-medium text-slate-400">Rechtstexte</span>
+              <Badge className="bg-green-500/20 text-green-400 border-none uppercase text-[8px]">GEFUNDEN</Badge>
             </div>
           </CardContent>
         </Card>
@@ -390,24 +280,24 @@ export default function ScanResultPage() {
           </h3>
 
           <div className="grid gap-6">
-            {findings.map((finding, idx) => (
+            {findings.map((finding: any, idx: number) => (
               <Card key={idx} className="group border-slate-200 transition-all hover:border-blue-200 hover:shadow-md card">
                 <CardContent className="p-0">
                   <div className="flex flex-col md:flex-row">
                     <div className={cn(
-                      "w-full md:w-40 p-4 md:p-6 flex flex-row md:flex-col items-center justify-start md:justify-center text-left md:text-center gap-4 md:gap-2 border-b md:border-b-0 md:border-r print:bg-slate-50",
-                      finding.severity === 'High' ? "bg-red-50/50" : finding.severity === 'Medium' ? "bg-amber-50/50" : "bg-blue-50/50"
+                      "w-full md:w-40 p-4 md:p-6 flex flex-row md:flex-col items-center justify-start md:justify-center text-left md:text-center gap-4 md:gap-2 border-b md:border-b-0 md:border-r",
+                      finding.severity === 'high' ? "bg-red-50/50" : finding.severity === 'medium' ? "bg-amber-50/50" : "bg-blue-50/50"
                     )}>
                       <div className={cn(
                         "p-2 md:p-3 rounded-xl md:rounded-2xl",
-                        finding.severity === 'High' ? "bg-red-100 text-red-600" : finding.severity === 'Medium' ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"
-                      )} aria-hidden="true">
-                        {finding.severity === 'High' ? <AlertCircle className="h-5 w-5 md:h-6 md:w-6" /> : finding.severity === 'Medium' ? <AlertCircle className="h-5 w-5 md:h-6 md:w-6" /> : <Info className="h-5 w-5 md:h-6 md:w-6" />}
+                        finding.severity === 'high' ? "bg-red-100 text-red-600" : finding.severity === 'medium' ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"
+                      )}>
+                        <AlertCircle className="h-5 w-5 md:h-6 md:w-6" />
                       </div>
                       <div className="flex flex-col md:items-center">
                         <span className={cn(
                           "text-[10px] font-black uppercase tracking-widest",
-                          finding.severity === 'High' ? "text-red-600" : finding.severity === 'Medium' ? "text-amber-600" : "text-blue-600"
+                          finding.severity === 'high' ? "text-red-600" : finding.severity === 'medium' ? "text-amber-600" : "text-blue-600"
                         )}>
                           {finding.severity}-Risk
                         </span>
@@ -420,7 +310,7 @@ export default function ScanResultPage() {
                           <h4 className="text-xl font-extrabold text-slate-900 leading-tight">{finding.title}</h4>
                         </div>
                         <Badge variant="outline" className="w-fit font-bold border-slate-200 text-slate-500 uppercase text-[10px]">
-                          Web-Crawler 1.0 (PROTOTYPE)
+                          Smart-Check 2.0
                         </Badge>
                       </div>
 
@@ -428,20 +318,20 @@ export default function ScanResultPage() {
                         <div className="space-y-4">
                           <div>
                             <p className="text-xs font-black text-slate-900 uppercase tracking-tighter mb-2">Beschreibung</p>
-                            <p className="text-sm text-slate-600 font-medium leading-relaxed">{finding.description}</p>
+                            <p className="text-sm text-slate-600 font-medium leading-relaxed">{finding.description_de}</p>
                           </div>
-                          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 print:bg-slate-50">
+                          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
                             <p className="text-xs font-black text-slate-900 uppercase tracking-tighter mb-1.5 flex items-center gap-1.5">
                               <AlertCircle className="h-3 w-3 text-red-500" /> Auswirkung
                             </p>
-                            <p className="text-xs text-slate-500 font-semibold">{finding.impact}</p>
+                            <p className="text-xs text-slate-500 font-semibold">{finding.impact_de || 'Datenschutzverstoß mit Abmahnrisiko.'}</p>
                           </div>
                         </div>
 
                         <div className="space-y-4">
                           <div>
                             <p className="text-xs font-black text-slate-900 uppercase tracking-tighter mb-2">Empfohlene Maßnahme</p>
-                            <p className="text-sm text-slate-600 font-medium leading-relaxed italic">&quot;{finding.recommendation}&quot;</p>
+                            <p className="text-sm text-slate-600 font-medium leading-relaxed italic">&quot;{finding.recommendation_de}&quot;</p>
                           </div>
                           <Button 
                             variant="outline" 
@@ -469,11 +359,11 @@ export default function ScanResultPage() {
             <CheckCircle2 className="h-5 w-5 text-blue-600" />
           </div>
           <div className="space-y-1 flex-1">
-            <p className="text-sm font-bold text-slate-900">Haftungsausschluss</p>
+            <p className="text-sm font-bold text-slate-900">Information</p>
             <p className="text-xs text-slate-500 font-medium leading-relaxed">
               Dieser Bericht wurde automatisiert erstellt und dient der ersten Orientierung. 
-              Er ersetzt keine Rechtsberatung durch einen qualifizierten Rechtsanwalt oder Datenschutzbeauftragten.
-              {branding.report_footer && <span className="block mt-1 font-bold italic text-slate-700">{branding.report_footer}</span>}
+              Er ersetzt keine Rechtsberatung.
+              {agency?.report_footer && <span className="block mt-1 font-bold italic text-slate-700">{agency.report_footer}</span>}
             </p>
           </div>
         </CardContent>

@@ -132,3 +132,41 @@
     display: none;
   }
 }
+
+/* --- Cookie Consent Premium Styles --- */
+#cc-main {
+    --cc-bg: rgba(255, 255, 255, 0.85);
+    --cc-text: #0f172a;
+    --cc-btn-primary-bg: #0f172a;
+    --cc-btn-primary-text: #ffffff;
+    --cc-btn-primary-hover-bg: #1e293b;
+    --cc-btn-secondary-bg: #f1f5f9;
+    --cc-btn-secondary-text: #0f172a;
+    --cc-btn-secondary-hover-bg: #e2e8f0;
+    --cc-separator-border-color: #f1f5f9;
+    --cc-modal-border-radius: 1.5rem;
+    --cc-btn-border-radius: 0.75rem;
+    --cc-font-family: var(--font-sans);
+}
+
+#cc-main .cm {
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+#cc-main .cm__title {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
+
+#cc-main .cm__btn {
+    font-weight: 700;
+}
+
+#cc-main .pm {
+    backdrop-filter: blur(16px);
+    border-radius: 2rem;
+}
+
+

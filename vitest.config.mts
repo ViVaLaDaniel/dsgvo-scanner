@@ -11,6 +11,11 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './'),
     },
+    server: {
+      deps: {
+        inline: [/@exodus\/bytes/, /html-encoding-sniffer/],
+      },
+    },
     include: ['__tests__/unit/**/*.test.{ts,tsx}'],
   },
 });
