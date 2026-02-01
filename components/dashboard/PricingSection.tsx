@@ -44,31 +44,44 @@ export function PricingSection() {
   const [supabase] = useState(() => createClient());
 
   const handleSubscribe = async (priceId: string) => {
-    if (!paddle) return;
+    if (!paddle) {
+      console.error('Paddle: Not initialized yet');
+      return;
+    }
     setLoading(priceId);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (!user) {
-        alert('Bitte melden Sie sich erst an.');
+      if (!user || !user.email) {
+        alert('Bitte melden Sie sich erst an (User Email missing).');
         setLoading(null);
         return;
       }
 
+      console.log('Paddle: Opening checkout for', priceId, 'User:', user.email);
+
       paddle.Checkout.open({
         items: [{ priceId, quantity: 1 }],
         customer: {
-          email: user.email!,
+          email: user.email,
         },
         customData: {
           userId: user.id
+        },
+        settings: {
+          displayMode: 'overlay',
+          theme: 'light',
+          locale: 'de'
         }
       });
     } catch (err) {
-      console.error('Checkout error:', err);
+      console.error('Paddle Checkout error:', err);
+      alert('Fehler beim Öffnen des Bezahlvorgangs. Bitte prüfen Sie die Konsole.');
     } finally {
-      setLoading(null);
+      // Keep loading state briefly to prevent double-clicks, but eventually clear it
+      // Since Checkout.open is sync (overlays), we don't know when it closes easily without events
+      setTimeout(() => setLoading(null), 2000);
     }
   };
 
