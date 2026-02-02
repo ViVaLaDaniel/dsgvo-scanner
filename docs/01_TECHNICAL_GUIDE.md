@@ -6,7 +6,7 @@
 ---
 
 ## 🏗️ Технологический Стек
-- **Frontend:** Next.js 15+ (App Router), React 19, TypeScript.
+- **Frontend:** Next.js 16.1.3 (App Router), React 19, TypeScript.
 - **Styling:** Tailwind CSS 4, Shadcn/UI (премиальный дизайн, темная тема).
 - **Backend/DB:** Supabase (Auth, PostgreSQL, Row Level Security).
 - **Scanner Engine:** Playwright (Chromium) для глубокого динамического анализа.

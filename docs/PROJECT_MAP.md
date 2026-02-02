@@ -1,7 +1,7 @@
 # Карта проекта DSGVO Scanner (Master Roadmap)
 
-**Ready: 🚀 100% (Production Ready & Feature Complete)**
-`[||||||||||||||]`
+**Ready: 🚀 95% (Release Candidate)**
+`[|||||||||||||.]`
 
 > [!TIP]
 > Полный отчет о работе всех AI-агентов (Jule, CodeRabbit, Palette) находится в файле [AGENT_INSIGHTS.md](./AGENT_INSIGHTS.md).
@@ -24,7 +24,7 @@ SaaS-платформа для автоматического аудита ве�
 *Antigravity (Lead AI Architect)*
 
 ## Технологический стек
-- **Frontend:** Next.js 15+ (App Router), React 19, TypeScript
+- **Frontend:** Next.js 16.1.3 (App Router), React 19, TypeScript
 - **Styling:** Tailwind CSS 4, Shadcn/UI
 - **Backend / Database:** Supabase (PostgreSQL + Auth + RLS)
 - **Scanner Engine:** Playwright (Headless Browser)
