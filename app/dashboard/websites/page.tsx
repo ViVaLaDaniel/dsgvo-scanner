@@ -111,7 +111,7 @@ export default function WebsitesPage() {
           onClick={() => setShowAddForm(!showAddForm)}
           className={cn("font-bold shadow-lg transition-all", showAddForm ? "bg-slate-800" : "shadow-blue-500/20")}
         >
-          <Plus className={cn("h-4 w-4 mr-2 transition-transform", showAddForm && "rotate-45")} />
+          <Plus className={cn("h-4 w-4 transition-transform", showAddForm && "rotate-45")} />
           {showAddForm ? 'Abbrechen' : 'Website hinzufügen'}
         </Button>
       </div>
@@ -162,8 +162,8 @@ export default function WebsitesPage() {
           </div>
 
           <div className="flex gap-3 pt-4">
-            <Button type="submit" disabled={isSubmitting} className="flex-1 font-bold shadow-lg shadow-blue-500/20">
-              {isSubmitting ? 'Wird gespeichert...' : 'Hinzufügen'}
+            <Button type="submit" isLoading={isSubmitting} className="flex-1 font-bold shadow-lg shadow-blue-500/20">
+              Hinzufügen
             </Button>
             <Button type="button" variant="outline" onClick={() => setShowAddForm(false)} className="flex-1 font-bold">
               Abbrechen
@@ -229,6 +229,7 @@ export default function WebsitesPage() {
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
                           className="text-slate-300 hover:text-blue-500 transition-colors"
+                          aria-label="Website besuchen"
                         >
                           <ExternalLink className="h-3 w-3" />
                         </a>
@@ -254,25 +255,20 @@ export default function WebsitesPage() {
                           e.stopPropagation();
                           handleAction(website.id, scan?.id);
                         }}
-                        disabled={isScanning === website.id}
+                        isLoading={isScanning === website.id}
                         className={cn(
                           "font-bold h-10 px-6",
                           !scan && "bg-blue-600 shadow-lg shadow-blue-500/20"
                         )}
                       >
-                        {isScanning === website.id ? (
+                        {isScanning === website.id ? 'Scannen...' : scan ? (
                           <>
-                            <div className="h-3 w-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2" />
-                            Scannen...
-                          </>
-                        ) : scan ? (
-                          <>
-                            <ShieldCheck className="h-3.5 w-3.5 mr-2" />
+                            <ShieldCheck className="h-3.5 w-3.5" />
                             Bericht
                           </>
                         ) : (
                           <>
-                            <Play className="h-3.5 w-3.5 mr-2 fill-current" />
+                            <Play className="h-3.5 w-3.5 fill-current" />
                             Jetzt scannen
                           </>
                         )}
@@ -286,6 +282,7 @@ export default function WebsitesPage() {
                           handleDelete(website.id);
                         }}
                         className="text-slate-300 hover:text-red-600 hover:bg-red-50 h-10 w-10 p-0"
+                        aria-label="Website löschen"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
