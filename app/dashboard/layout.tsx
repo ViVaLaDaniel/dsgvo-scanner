@@ -161,7 +161,7 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        <main className="p-6 lg:p-8 animate-in fade-in duration-500">
+        <main className="mx-auto w-full max-w-7xl p-6 lg:p-8 animate-in fade-in duration-500">
           {children}
         </main>
       </div>

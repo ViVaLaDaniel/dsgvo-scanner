@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Globe, Trash2, Play, ExternalLink, ShieldCheck, ArrowRight, CheckCircle, Shield, Clock, AlertTriangle } from 'lucide-react';
+import { Plus, Globe, Trash2, Play, ExternalLink, ShieldCheck, ArrowRight, CheckCircle, Shield, Clock, AlertTriangle, Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useSmoothScroll } from '@/lib/hooks/useSmoothScroll';
 import { DashboardPreview } from '@/components/landing/DashboardPreview';
@@ -14,12 +15,30 @@ import { DemoModal } from '@/components/landing/DemoModal';
 export default function HomePage() {
   const { scrollTo } = useSmoothScroll();
   const [isDemoOpen, setIsDemoOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [authModal, setAuthModal] = useState<{isOpen: boolean, view: 'login' | 'register'}>({
     isOpen: false,
     view: 'login'
   });
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      window.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [isMenuOpen]);
+
   const openAuth = (view: 'login' | 'register') => {
+    setIsMenuOpen(false); // Close mobile menu when auth modal opens
     setAuthModal({ isOpen: true, view });
   };
 
@@ -58,7 +77,7 @@ export default function HomePage() {
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white/70 backdrop-blur-md transition-all">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center max-w-7xl">
-          <div className="flex items-center gap-2 group cursor-pointer">
+          <Link href="/" className="flex items-center gap-2 group cursor-pointer">
             <div className="bg-blue-600 p-1.5 rounded-lg transition-transform group-hover:scale-110">
               <Shield className="h-6 w-6 text-white" />
             </div>
@@ -67,8 +86,9 @@ export default function HomePage() {
                 DSGVO<span className="text-blue-600">Scanner</span>
               </span>
             </div>
-          </div>
-          {/* ... resto del header ... */}
+          </Link>
+          
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
             <button 
               onClick={() => scrollTo('features')} 
@@ -83,7 +103,7 @@ export default function HomePage() {
               Preise
             </button>
           </nav>
-          <div className="flex gap-4 items-center">
+          <div className="hidden md:flex gap-4 items-center">
             <Button 
               variant="ghost" 
               onClick={() => openAuth('login')}
@@ -98,7 +118,69 @@ export default function HomePage() {
               Kostenlos Testen
             </Button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <Button variant="ghost" onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative h-8 w-8 p-0">
+              <AnimatePresence initial={false} mode="wait">
+                <motion.div
+                  key={isMenuOpen ? 'x' : 'menu'}
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                </motion.div>
+              </AnimatePresence>
+            </Button>
+          </div>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg overflow-hidden"
+            >
+              <div className="container mx-auto px-4 py-8 flex flex-col gap-6">
+                <nav className="flex flex-col gap-6 text-lg font-medium text-slate-700">
+                  <button 
+                    onClick={() => { scrollTo('features'); setIsMenuOpen(false); }} 
+                    className="hover:text-blue-600 transition-colors cursor-pointer text-left"
+                  >
+                    Funktionen
+                  </button>
+                  <button 
+                    onClick={() => { scrollTo('pricing'); setIsMenuOpen(false); }} 
+                    className="hover:text-blue-600 transition-colors cursor-pointer text-left"
+                  >
+                    Preise
+                  </button>
+                </nav>
+                <div className="border-t pt-6 flex flex-col gap-4">
+                  <Button 
+                    variant="outline"
+                    onClick={() => openAuth('login')}
+                    className="font-bold w-full py-6"
+                  >
+                    Anmelden
+                  </Button>
+                  <Button 
+                    onClick={() => openAuth('register')}
+                    className="font-bold w-full py-6"
+                  >
+                    Kostenlos Testen
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <main className="flex-1">
