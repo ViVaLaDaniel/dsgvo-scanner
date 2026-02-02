@@ -62,9 +62,9 @@ export function CookieBanner() {
           <div className="flex-grow space-y-2">
             <h3 className="text-lg font-bold text-slate-900 dark:text-white">Datenschutz-Einstellungen</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-              Wir verwenden Cookies, чтобы улучшить ваш опыт, анализировать трафик и обеспечивать безопасность. 
-              Einige sind essenziell, другие помогают нам улучшать сервис. Вы можете изменить настройки в любое время.
-              Подробности в нашей <Link href="/datenschutz" className="text-blue-600 hover:underline">Datenschutzerklärung</Link>.
+              Wir verwenden Cookies, um Ihre Erfahrung zu verbessern, den Traffic zu analysieren und Sicherheit zu gewährleisten. 
+              Einige sind essenziell, andere helfen uns, unseren Service zu verbessern. Sie können die Einstellungen jederzeit ändern.
+              Details in unserer <Link href="/datenschutz" className="text-blue-600 hover:underline">Datenschutzerklärung</Link>.
             </p>
           </div>
 

@@ -45,7 +45,7 @@ export function Testimonials() {
             Das sagen <span className="text-blue-600">glückliche Experten</span>
           </h2>
           <p className="text-slate-600 max-w-2xl mx-auto font-medium">
-            Schon über 200 Datenschutzbeauftragte vertrauen auf unsere Lösung, um ihre tägliche Arbeit effizienter и sicherer zu machen.
+            Schon über 200 Datenschutzbeauftragte vertrauen auf unsere Lösung, um ihre tägliche Arbeit effizienter und sicherer zu machen.
           </p>
         </div>
 
@@ -103,7 +103,7 @@ export function Testimonials() {
                 Bereit für den <br className="md:hidden" /> <span className="text-blue-400">Wow-Effekt?</span>
               </h2>
               <p className="text-slate-400 text-lg max-w-2xl mx-auto font-medium">
-                Schließen Sie sich den Profis an и sparen Sie noch heute bares Geld и wertvolle Lebenszeit. Keine Risiken, jederzeit kündbar.
+                Schließen Sie sich den Profis an und sparen Sie noch heute bares Geld und wertvolle Lebenszeit. Keine Risiken, jederzeit kündbar.
               </p>
               <div className="flex justify-center pt-4">
                 <button 

@@ -15,7 +15,7 @@ export default function AuthCodeErrorPage() {
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-slate-900">Authentifizierungsfehler</h1>
           <p className="text-slate-500">
-            Der Bestätigungscode ist ungültig oder abgelaufen. Bitte versuchen Sie sich erneut anzumelden или fordern Sie einen neuen Link an.
+            Der Bestätigungscode ist ungültig oder abgelaufen. Bitte versuchen Sie sich erneut anzumelden oder fordern Sie einen neuen Link an.
           </p>
         </div>
 

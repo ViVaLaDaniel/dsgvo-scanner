@@ -34,12 +34,12 @@ export async function POST(req: NextRequest) {
     const agencyName = agency?.name || 'DSGVO Scanner';
 
     const { data, error } = await resend.emails.send({
-      from: 'DSGVO Scanner <onboarding@resend.dev>', // В продакшене заменить на домен агентства
+      from: 'DSGVO Scanner <onboarding@resend.dev>', // In production replace with agency domain
       to: email,
       subject: `DSGVO Analyse-Bericht: ${websiteUrl}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; borderRadius: 12px;">
-          <h2 style="color: #0f172a;">Guten Tag ${clientName || 'заказчик'},</h2>
+          <h2 style="color: #0f172a;">Guten Tag ${clientName || 'Kunde'},</h2>
           <p style="color: #475569; line-height: 1.6;">
             Ihre DSGVO-Prüfung für die Website <strong>${websiteUrl}</strong> wurde erfolgreich abgeschlossen.
           </p>

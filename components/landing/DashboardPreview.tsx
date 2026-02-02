@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 const slides = [
   {
     title: "Vollautomatische Scans",
-    description: "Überwachen Sie alle Ihre Mandanten-Websites rund um die Uhr. Wir finden Google Fonts, unzulässige Cookies и US-CDNs.",
+    description: "Überwachen Sie alle Ihre Mandanten-Websites rund um die Uhr. Wir finden Google Fonts, unzulässige Cookies und US-CDNs.",
     icon: Globe,
     color: "blue",
     preview: (
@@ -39,7 +39,7 @@ const slides = [
   },
   {
     title: "Sofortige Alarmierung",
-    description: "Sobald ein Verstoß erkannt wird, erhalten Sie и Ihr Mandant (optional) eine detaillierte Benachrichtigung.",
+    description: "Sobald ein Verstoß erkannt wird, erhalten Sie und Ihr Mandant (optional) eine detaillierte Benachrichtigung.",
     icon: AlertCircle,
     color: "red",
     preview: (
