@@ -9,3 +9,7 @@
 ## 2025-05-15 - Button Icon Spacing
 **Learning:** The `Button` component uses `gap-2` for spacing between icon and text. Manually adding `mr-2` to icons results in double spacing.
 **Action:** Remove `mr-2` or margin classes from icons when using them inside the standard `Button` component.
+
+## 2025-05-15 - Form Accessibility: React Hook Form
+**Learning:** When adding standard accessibility attributes (htmlFor/id) to forms using `react-hook-form`, ensure the `id` prop is explicitly passed to the `Input` component. Also, replace raw `<label>` elements with the `Label` component to ensure consistent design system styling and accessibility behaviors.
+**Action:** Always pair `Label` (from ui/label) with `Input`, and ensure `htmlFor` matches `id`.
