@@ -44,25 +44,50 @@ export default function DashboardPage() {
       // Load all data in parallel for performance
       const [
         { data: profile },
-        { count: websitesCount },
+        { data: websites, count: websitesCount },
         { data: scans }
       ] = await Promise.all([
         supabase.from('user_profiles').select('website_limit').eq('id', user.id).single(),
-        supabase.from('websites').select('*', { count: 'exact', head: true }),
+        supabase.from('websites').select('id', { count: 'exact' }),
         supabase.from('scans')
           .select(`id, status, violations_count, created_at, risk_score, website:websites(client_name, url)`)
           .order('created_at', { ascending: false })
-          .limit(10) // Fetch more for calculations
+          .limit(10)
       ]);
 
-      const critical = scans?.filter(s => (s.risk_score || 0) < 50).length || 0;
-      const totalScore = scans?.reduce((acc, s) => acc + (s.risk_score || 0), 0) || 0;
-      const avg = scans && scans.length > 0 ? Math.round(totalScore / scans.length) : 100;
+      // Calculate stats based on latest scan per website
+      let latestScores: number[] = [];
+      let criticalSites = 0;
+
+      if (websites && websites.length > 0) {
+        const latestScansPromises = websites.map(site =>
+          supabase
+            .from('scans')
+            .select('risk_score')
+            .eq('website_id', site.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        );
+
+        const results = await Promise.all(latestScansPromises);
+
+        results.forEach(res => {
+          if (res.data) {
+            const score = res.data.risk_score || 0;
+            latestScores.push(score);
+            if (score < 50) criticalSites++;
+          }
+        });
+      }
+
+      const totalScore = latestScores.reduce((acc, s) => acc + s, 0);
+      const avg = latestScores.length > 0 ? Math.round(totalScore / latestScores.length) : 0;
 
       setStats({
         websitesCount: websitesCount || 0,
         websiteLimit: profile?.website_limit || 10,
-        criticalCount: critical,
+        criticalCount: criticalSites,
         avgScore: avg
       });
 
