@@ -76,7 +76,7 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                   </Badge>
                   <CardTitle className="text-2xl font-black text-slate-900">{selectedSolution.title}</CardTitle>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setSelectedSolution(null)} className="rounded-full">
+                <Button variant="ghost" size="icon" onClick={() => setSelectedSolution(null)} className="rounded-full" aria-label="Lösung schließen">
                   <ShieldCheck className="h-6 w-6 text-slate-400" />
                 </Button>
               </div>
@@ -126,7 +126,7 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+          <Button variant="ghost" size="icon" onClick={() => router.back()} aria-label="Zurück">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>

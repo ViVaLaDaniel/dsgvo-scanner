@@ -9,3 +9,7 @@
 ## 2025-05-15 - Button Icon Spacing
 **Learning:** The `Button` component uses `gap-2` for spacing between icon and text. Manually adding `mr-2` to icons results in double spacing.
 **Action:** Remove `mr-2` or margin classes from icons when using them inside the standard `Button` component.
+
+## 2026-02-05 - Dynamic Labels for Toggle Buttons
+**Learning:** For buttons that toggle state (like menus), prefer dynamic `aria-label` (e.g., "Menü öffnen" / "Menü schließen") over static labels when the icon changes or the context shifts significantly.
+**Action:** Use conditional `aria-label` logic in JSX for toggle components.
