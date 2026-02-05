@@ -23,7 +23,9 @@
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Backend & Auth**: [Supabase](https://supabase.com/) (PostgreSQL + RLS)
-- **Deployment**: [Vercel](https://vercel.com/)
+- **Deployment**: Hybrid Architecture
+  - **Frontend**: [Vercel](https://vercel.com/) (Serverless)
+  - **Scanner Engine**: [DigitalOcean Droplet](https://www.digitalocean.com/) (Docker Microservice)
 
 ---
 

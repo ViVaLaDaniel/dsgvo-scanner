@@ -121,26 +121,101 @@ export function scanHtmlContent(html: string, detectedKeys: Set<string>): Findin
   return newFindings;
 }
 
+// Remote Scan Interface
+interface RemoteScanResponse {
+  score: number;
+  findings: string[];
+  error?: string;
+  cookies_count?: number;
+}
+
 export async function analyzeWebsite(url: string): Promise<ScanResult> {
+  // CONFIGURATION:
+  // If SCANNER_MICROSERVICE_URL is set (e.g. in Vercel), use it.
+  // Otherwise, try to run local Playwright (e.g. on localhost).
+  const REMOTE_SCANNER_URL = process.env.SCANNER_MICROSERVICE_URL;
+  const REMOTE_SCANNER_SECRET = process.env.SCANNER_SECRET;
+
+  // MODE 1: REMOTE SCAN (For Vercel / Production)
+  if (REMOTE_SCANNER_URL) {
+    console.log(`[ScanEngine] Delegating scan to microservice: ${REMOTE_SCANNER_URL}`);
+    try {
+      const response = await fetch(REMOTE_SCANNER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, secret: REMOTE_SCANNER_SECRET })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Microservice error: ${response.status} ${response.statusText}`);
+      }
+
+      const data: RemoteScanResponse = await response.json();
+      
+      if (data.error) throw new Error(data.error);
+
+      // Map raw string findings back to our structured objects
+      const structuredFindings: Finding[] = [];
+      const detectedKeys = new Set<string>();
+
+      // Text-based matching from microservice response
+      // (The microservice returns simple strings like "Google Fonts", we need to map them back to full Finding objects)
+      if (data.findings) {
+        const potentialFindings = [
+          { key: 'GOOGLE_FONTS', match: 'Google Fonts' },
+          { key: 'GOOGLE_TAG_MANAGER', match: 'Google Tag Manager' },
+          { key: 'GOOGLE_ANALYTICS', match: 'Google Analytics' },
+          { key: 'YOUTUBE', match: 'YouTube' }, // Matches "YouTube Embed"
+          { key: 'FONTAWESOME_CDN', match: 'Font Awesome' }
+        ];
+
+        for (const fText of data.findings) {
+          for (const p of potentialFindings) {
+            if (fText.includes(p.match) && !detectedKeys.has(p.key)) {
+              detectedKeys.add(p.key);
+              structuredFindings.push(SCAN_PATTERNS[p.key as keyof typeof SCAN_PATTERNS].finding as Finding);
+            }
+          }
+           // Special handling for generic cookies if not mapped
+           if (fText.includes('Cookies detected') && !detectedKeys.has('COOKIES')) {
+              detectedKeys.add('COOKIES');
+              structuredFindings.push({
+                category: 'Cookies',
+                title: 'Cookies detected (Unconsented)',
+                status: 'warning',
+                severity: 'medium',
+                description_de: `Es wurden Cookies erkannt, bevor der Nutzer seine Einwilligung gegeben hat.`,
+                recommendation_de: 'Stellen Sie sicher, dass alle nicht notwendigen Cookies blockiert werden.',
+                technical_details: { raw: fText }
+              } as Finding);
+           }
+        }
+      }
+
+      return { score: data.score, findings: structuredFindings };
+
+    } catch (error) {
+       console.error('[ScanEngine] Remote scan failed:', error);
+       // Fallback to static scan if remote fails? Or re-throw?
+       // For now, re-throw because static scan is useless without HTML content
+       throw error;
+    }
+  }
+
+  // MODE 2: LOCAL SCAN (For Localhost Dev)
+  // This code runs only if no REMOTE_SCANNER_URL is defined
+  console.log('[ScanEngine] Running in LOCAL mode (Playwright)');
+  
   let score = 100;
   const findings: Finding[] = [];
   const detectedKeys = new Set<string>();
-
   let browser;
-  try {
-    // 1. Launch Browser
-    // Note: In production (Vercel), we MUST use an external browser endpoint
-    // because Vercel Serverless Functions do not include Chromium.
-    const wsEndpoint = process.env.BROWSER_WSE_ENDPOINT;
 
-    if (wsEndpoint) {
-      browser = await chromium.connectOverCDP(wsEndpoint);
-    } else {
-      browser = await chromium.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
-      });
-    }
+  try {
+    browser = await chromium.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
 
     const context = await browser.newContext({
       userAgent: 'Germani DSGVO Scanner/1.0 (Mozilla/5.0 Compliance Check)',
@@ -163,53 +238,44 @@ export async function analyzeWebsite(url: string): Promise<ScanResult> {
       }
     });
 
-    // 3. Navigate and Wait (Optimized: 'load' is more reliable than 'networkidle')
+    // 3. Navigate and Wait
     try {
       await page.goto(url, { waitUntil: 'load', timeout: 45000 });
     } catch (e: any) {
       console.warn(`Navigation timeout or error for ${url}, attempting to proceed with partial content:`, e.message);
-      // Even if it times out, we might have content we can scan
     }
 
-    // 4. Auto-Scroll to trigger lazy-loaded requests (Optimized & Faster)
+    // 4. Auto-Scroll to trigger lazy-loaded requests
     try {
-      await Promise.race([
-        page.evaluate(async () => {
-          await new Promise<void>((resolve) => {
-            let totalHeight = 0;
-            const distance = 400; // Increased distance
-            const timer = setInterval(() => {
-              const scrollHeight = document.body.scrollHeight;
-              window.scrollBy(0, distance);
-              totalHeight += distance;
-              if (totalHeight >= scrollHeight || totalHeight > 15000) { // Safety cap at 15k pixels
-                clearInterval(timer);
-                resolve();
-              }
-            }, 50); // Faster interval
-          });
-        }),
-        new Promise(resolve => setTimeout(resolve, 10000)) // 10s max for scrolling
-      ]);
+      await page.evaluate(async () => {
+        await new Promise<void>((resolve) => {
+          let totalHeight = 0;
+          const distance = 400; 
+          const timer = setInterval(() => {
+            const scrollHeight = document.body.scrollHeight;
+            window.scrollBy(0, distance);
+            totalHeight += distance;
+            if (totalHeight >= scrollHeight || totalHeight > 15000) { 
+              clearInterval(timer);
+              resolve();
+            }
+          }, 50); 
+        });
+      });
+      // Safety wait
+      await new Promise(r => setTimeout(r, 2000));
     } catch (e) {
       console.warn("Scroll failed or timed out, proceeding anyway");
     }
 
-    // Wait a bit more for dynamic requests after scroll
-    await page.waitForTimeout(2000);
-
-    // 5. STATIC ANALYSIS (Optimized)
-    // Scan the full HTML content for patterns that might not have triggered a network request
-    // (e.g. blocked scripts, meta tags, css links)
+    // 5. STATIC ANALYSIS
     const html = await page.content();
     const staticFindings = scanHtmlContent(html, detectedKeys);
     findings.push(...staticFindings);
 
-    // 6. ANALYZE COOKIES & STORAGE
+    // 6. ANALYZE COOKIES
     const cookies = await context.cookies();
-    const localStorageData = await page.evaluate(() => JSON.stringify(window.localStorage));
     
-    // Simple check: if cookies exist without a consent action being simulated, it's a potential warning
     if (cookies.length > 0) {
       findings.push({
         category: 'Cookies',
@@ -217,7 +283,7 @@ export async function analyzeWebsite(url: string): Promise<ScanResult> {
         status: 'warning',
         severity: 'medium',
         description_de: `Es wurden ${cookies.length} Cookies erkannt, bevor der Nutzer seine Einwilligung gegeben hat.`,
-        recommendation_de: 'Stellen Sie sicher, dass alle nicht notwendigen Cookies blockiert werden, bis eine ausdrückliche Einwilligung über das Cookie-Banner erfolgt.',
+        recommendation_de: 'Stellen Sie sicher, dass alle nicht notwendigen Cookies blockiert werden.',
         technical_details: { count: cookies.length, names: cookies.map(c => c.name) }
       } as Finding);
     }

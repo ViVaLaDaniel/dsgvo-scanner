@@ -7,7 +7,7 @@ Write-Host ""
 Write-Host "Checking Jules (Background Agent)..." -ForegroundColor Yellow
 $julesStatus = jules remote list --session | Select-Object -First 5
 if ($julesStatus) {
-    echo $julesStatus
+    Write-Output $julesStatus
     Write-Host "Tip: Use 'jules remote pull --session <ID>' to apply changes." -ForegroundColor DarkGray
 } else {
     Write-Host "No active Jules sessions." -ForegroundColor Gray
