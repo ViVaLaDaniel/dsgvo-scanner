@@ -5,3 +5,7 @@
 ## 2025-05-15 - Standardized Button Loading
 **Learning:** Adding `isLoading` to the base `Button` component (using `lucide-react` Loader2) standardizes loading states and prevents layout shifts caused by changing text to "Loading...".
 **Action:** Use `isLoading={loading}` instead of conditional text rendering for all async actions.
+
+## 2025-05-15 - Button Icon Spacing
+**Learning:** The `Button` component uses `gap-2` for spacing between icon and text. Manually adding `mr-2` to icons results in double spacing.
+**Action:** Remove `mr-2` or margin classes from icons when using them inside the standard `Button` component.
