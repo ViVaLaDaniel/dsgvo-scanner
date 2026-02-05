@@ -148,6 +148,7 @@ export default function SettingsPage() {
                     {localAgency.logo_url ? (
                       <div className="relative group w-fit">
                         <div className="h-24 px-6 py-4 bg-white border border-slate-200 rounded-2xl flex items-center justify-center shadow-sm overflow-hidden min-w-[200px]">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img 
                             src={localAgency.logo_url} 
                             alt="Agency Logo" 

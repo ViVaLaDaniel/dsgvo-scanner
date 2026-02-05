@@ -24,7 +24,8 @@ These must be set in Vercel Project Settings for the Production Environment:
 | `NEXT_PUBLIC_SUPABASE_URL` | *from Supabase* | Connection to DB |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | *from Supabase* | Connection to DB |
 | `SCANNER_MICROSERVICE_URL` | `https://scanner.n8ndo.es/scan` | Pointing to our Droplet |
-| `SCANNER_SECRET` | *Your chosen secret* | Auth token for the microservice |
+| `SCANNER_MICROSERVICE_URL` | `https://scanner.n8ndo.es/scan` | Pointing to our Droplet |
+| `SCANNER_SECRET` | `Crank967452` | **Active Secret** (Must match Droplet) |
 
 ---
 
@@ -42,7 +43,7 @@ These must be set in Vercel Project Settings for the Production Environment:
 
 2.  **Directory Structure:**
     We do NOT clone the full Next.js repo. We only run a minimal Express+Playwright service.
-    `mkdir -p /opt/scanner-service`
+    `mkdir -p /opt/dsgvo-scanner`
 
 ### 🚀 Deployment (Docker)
 
@@ -63,42 +64,30 @@ docker run -d \
   --name micro-scanner \
   --restart unless-stopped \
   -p 4000:4000 \
-  -e SCANNER_SECRET="YOUR_SECRET_KEY_HERE" \
+  -e SCANNER_SECRET="Crank967452" \
   micro-scanner
 ```
 
-### 🌐 Nginx Reverse Proxy (Side-by-side with n8n)
+### 🌐 Caddy Reverse Proxy (Via n8n)
 
-The droplet at `165.227.154.133` runs Nginx to route traffic based on domains:
+Since the droplet is already using **Caddy** (via n8n's Docker setup) to manage ports 80/443, we integrated into the existing Caddy instance instead of installing Nginx.
 
-- **n8n**: `n8n.n8ndo.es` -> `localhost:5678` (Existing Workflow Automation)
-- **Scanner**: `scanner.n8ndo.es` -> `localhost:4000` (Our New Service)
+**Config Location:** `/opt/n8n-docker-caddy/caddy_config/Caddyfile`
 
-**DNS Setup (Required):**
-- Log in to your Domain Registrar (where n8ndo.es is bought).
-- Add **A Record**: `scanner` -> `165.227.154.133`
-
-**Nginx Config Block (`/etc/nginx/sites-available/dsgvo-scanner`):**
-```nginx
-server {
-    server_name scanner.n8ndo.es;
-
-    location / {
-        proxy_pass http://localhost:4000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
+**Added Configuration:**
+```text
+scanner.n8ndo.es {
+    reverse_proxy 165.227.154.133:4000
 }
 ```
 
-### SSL Certificate (Let's Encrypt)
-Run this on the droplet after setting up DNS:
+**Restart Command:**
 ```bash
-sudo certbot --nginx -d scanner.n8ndo.es
+cd /opt/n8n-docker-caddy
+docker compose restart caddy
 ```
+
+*Note: Caddy automatically handles SSL (HTTPS) for `scanner.n8ndo.es`.*
 
 ---
 

@@ -170,6 +170,7 @@ export const ScanReportPDF: React.FC<Props> = ({ scan, website, agency }) => {
         {/* Header */}
         <View style={styles.header}>
           {agency.logo_url ? (
+            /* eslint-disable-next-line jsx-a11y/alt-text */
             <Image src={agency.logo_url} style={styles.logo} />
           ) : (
             <Text style={{ fontSize: 18, fontWeight: 'bold', color: brandColor }}>{agency.name}</Text>
