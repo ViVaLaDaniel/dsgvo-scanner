@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createClient } from '@/lib/supabase/client';
@@ -117,9 +118,9 @@ function RegisterForm() {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="company" className="text-sm font-semibold text-slate-700">
+            <Label htmlFor="company" className="text-sm font-semibold text-slate-700">
               Firmenname
-            </label>
+            </Label>
             <Input
               id="company"
               type="text"
@@ -132,9 +133,9 @@ function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="email" className="text-sm font-semibold text-slate-700">
+            <Label htmlFor="email" className="text-sm font-semibold text-slate-700">
               E-Mail
-            </label>
+            </Label>
             <Input
               id="email"
               type="email"
@@ -148,9 +149,9 @@ function RegisterForm() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-semibold text-slate-700">
+              <Label htmlFor="password" className="text-sm font-semibold text-slate-700">
                 Passwort
-              </label>
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -164,9 +165,9 @@ function RegisterForm() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="passwordConfirm" className="text-sm font-semibold text-slate-700">
+              <Label htmlFor="passwordConfirm" className="text-sm font-semibold text-slate-700">
                 Bestätigen
-              </label>
+              </Label>
               <Input
                 id="passwordConfirm"
                 type="password"
@@ -181,9 +182,9 @@ function RegisterForm() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="plan" className="text-sm font-semibold text-slate-700">
+            <Label htmlFor="plan" className="text-sm font-semibold text-slate-700">
               Ausgewählter Plan
-            </label>
+            </Label>
             <select
               id="plan"
               value={formData.plan}
