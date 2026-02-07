@@ -1,3 +1,5 @@
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 import { analyzeWebsite } from '../lib/scan-engine';
 
 async function test() {

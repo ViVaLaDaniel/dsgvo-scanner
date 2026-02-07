@@ -13,7 +13,7 @@ The project uses a **Hybrid Architecture** to bypass Vercel's serverless timeout
 - **Database:** Supabase (PostgreSQL + Auth) in **Frankfurt**.
 - **Scanner Engine:**
   - **Logic:** `lib/scan-engine.ts` contains the logic for both Local and Remote scanning.
-  - **Execution:** Heavy scanning (Playwright) runs on a **DigitalOcean Droplet** (`scanner.n8ndo.es`).
+  - **Execution:** Heavy scanning (Playwright) runs on a **DigitalOcean Droplet** (Direct IP: `http://165.227.154.133:4005`).
   - **Integration:** Vercel API sends a request to the Droplet -> Droplet runs Playwright -> Returns JSON.
 
 ## 💳 2. Payments Reality
