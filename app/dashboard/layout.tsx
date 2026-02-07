@@ -38,8 +38,9 @@ export default function DashboardLayout({
 
       const { count } = await supabase
         .from('websites')
-        .select('*', { count: 'exact', head: true });
-      setWebsiteCount(count || 0);
+        .select('*', { count: 'exact', head: true })
+        .eq('owner_id', user.id);
+      setWebsiteCount(count ?? 0);
     }
     loadProfile();
   }, [supabase, router, pathname]);
