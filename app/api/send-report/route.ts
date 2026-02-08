@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@/lib/supabase/server';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: NextRequest) {
   try {
     const { scanId, email, clientName, websiteUrl } = await req.json();
@@ -11,6 +9,9 @@ export async function POST(req: NextRequest) {
     if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_...') {
       return NextResponse.json({ error: 'Resend API Key ist nicht konfiguriert. Bitte in .env.local hinzufügen.' }, { status: 500 });
     }
+
+    // Initialize Resend here to avoid build-time errors if key is missing
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     if (!scanId || !email) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
