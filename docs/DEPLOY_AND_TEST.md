@@ -20,7 +20,7 @@
     *   **Key:** `SCANNER_MICROSERVICE_URL`
         *   **Value:** `https://scanner.n8ndo.es/scan`
     *   **Key:** `SCANNER_SECRET`
-        *   **Value:** `Crank967452`
+        *   **Value:** `ваш-scanner-secret`
 
 5.  После добавления переменных, перейдите во вкладку **Deployments** и перезапустите деплой (Redeploy) последнего коммита. Сборка должна пройти успешно.
 
