@@ -1,0 +1,19 @@
+# Exported from Render on 2026-02-08T09:44:23Z
+version: "1"
+projects:
+- name: My project
+  environments:
+  - name: Production
+    services:
+    - type: web
+      name: dsgvo-scanner
+      runtime: node
+      repo: https://github.com/ViVaLaDaniel/dsgvo-scanner
+      plan: free
+      envVars:
+      - key: PORT
+        sync: false
+      region: frankfurt
+      buildCommand: pnpm install --frozen-lockfile; pnpm run build
+      startCommand: pnpm run start
+      autoDeployTrigger: commit
