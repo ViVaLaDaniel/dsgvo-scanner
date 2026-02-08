@@ -1,5 +1,7 @@
 # Feature Plan: Add Re-scan Functionality
 
+> **Roadmap alignment:** относится к Phase B (Depth & Coverage) как обязательный UX‑элемент повторных проверок. См. [`../ROADMAP.md`](../ROADMAP.md).
+
 ## Goal
 Allow users to re-scan a website that has already been scanned. Currently, once a scan results in a report, the UI only allows viewing that report, with no option to trigger a fresh scan.
 

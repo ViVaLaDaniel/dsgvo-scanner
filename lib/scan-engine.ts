@@ -129,6 +129,45 @@ interface RemoteScanResponse {
   cookies_count?: number;
 }
 
+const REMOTE_SCAN_TIMEOUT_MS = 45000;
+const REMOTE_SCAN_MAX_RETRIES = 2;
+
+async function fetchWithTimeoutAndRetry(url: string, body: string) {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= REMOTE_SCAN_MAX_RETRIES; attempt += 1) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REMOTE_SCAN_TIMEOUT_MS);
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+        signal: controller.signal
+      });
+
+      if (!response.ok) {
+        throw new Error(`Microservice error: ${response.status} ${response.statusText}`);
+      }
+
+      return response;
+    } catch (error) {
+      lastError = error;
+      if (attempt < REMOTE_SCAN_MAX_RETRIES) {
+        const delayMs = 500 * 2 ** attempt;
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+        continue;
+      }
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  throw lastError;
+}
+
 export async function analyzeWebsite(url: string): Promise<ScanResult> {
   // CONFIGURATION:
   // If SCANNER_MICROSERVICE_URL is set (e.g. in Vercel), use it.
@@ -140,15 +179,10 @@ export async function analyzeWebsite(url: string): Promise<ScanResult> {
   if (REMOTE_SCANNER_URL) {
     console.log(`[ScanEngine] Delegating scan to microservice: ${REMOTE_SCANNER_URL}`);
     try {
-      const response = await fetch(REMOTE_SCANNER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, secret: REMOTE_SCANNER_SECRET })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Microservice error: ${response.status} ${response.statusText}`);
-      }
+      const response = await fetchWithTimeoutAndRetry(
+        REMOTE_SCANNER_URL,
+        JSON.stringify({ url, secret: REMOTE_SCANNER_SECRET })
+      );
 
       const data: RemoteScanResponse = await response.json();
       

@@ -4,6 +4,8 @@
 **ROLE:** Senior Full-Stack Engineer.
 **MODE:** Asynchronous Background Worker.
 
+> **Alignment:** all tasks must map to [`../ROADMAP.md`](../ROADMAP.md).
+
 ## 1. GOLDEN RULES (Best Practices)
 1.  **Micro-Tasks:** Do not attempt to refactor the whole app in one session. Break tasks into small, verifiable steps (e.g., "Fix Button Component" vs "Redesign UI").
 2.  **Context is King:** You MUST read `.ai/CONTEXT.md` at the start of every session. This is your specific version of `AGENTS.md`.

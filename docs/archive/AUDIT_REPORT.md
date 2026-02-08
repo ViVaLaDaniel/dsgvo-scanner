@@ -4,11 +4,13 @@
 **Auditor:** Antigravity (Advanced AI Coding Assistant)  
 **Final Status:** � **ALL CRITICAL ISSUES RESOLVED**
 
+> **Archive Notice:** это исторический отчёт; актуальная стратегия и приоритеты в [`../ROADMAP.md`](../ROADMAP.md).
+
 ## 1. Resolved Blockers (Fixed & Verified)
 
 ### ✅ Scanner Architecture (Vercel Compatibility)
 - **Problem**: Playwright failed on Vercel due to missing Chromium binary.
-- **Solution**: Implemented `chromium.connectOverCDP` supports. The system now uses **Browserless.io** for cloud-based scanning. 
+- **Solution**: Implemented remote scanning support. The current production flow uses a microservice via `SCANNER_MICROSERVICE_URL`.
 - **Status**: **RESOLVED**.
 
 ### ✅ Severe Localization Issues (Russian Leaks)
