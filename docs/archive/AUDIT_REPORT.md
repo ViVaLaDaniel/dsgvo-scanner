@@ -4,6 +4,8 @@
 **Auditor:** Antigravity (Advanced AI Coding Assistant)  
 **Final Status:** � **ALL CRITICAL ISSUES RESOLVED**
 
+> **Archive Notice:** это исторический отчёт; актуальная стратегия и приоритеты в [`../ROADMAP.md`](../ROADMAP.md).
+
 ## 1. Resolved Blockers (Fixed & Verified)
 
 ### ✅ Scanner Architecture (Vercel Compatibility)

@@ -4,6 +4,8 @@
 
 This project uses a **Hybrid Architecture** to overcome execution limits on serverless platforms (Vercel) while keeping costs low.
 
+> **Roadmap Note:** следующая итерация добавит очередь задач и отдельные worker‑процессы для сканирования (см. [`ROADMAP.md`](./ROADMAP.md)).
+
 - **Frontend & API (Next.js)**: Hosted on **Vercel**. Handles UI, Auth, Database interactions, and report generation.
   - **URL**: `https://dsgvo-scanner-plum.vercel.app/`
 - **Scanning Engine (Microservice)**: Hosted on a **DigitalOcean Droplet ($6/mo)**. Handles heavy Playwright/Chromium browser automation tasks.

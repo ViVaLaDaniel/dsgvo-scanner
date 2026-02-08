@@ -1,5 +1,7 @@
 # Руководство по Деплою и Тестированию
 
+> **Примечание:** после внедрения очередей задач (см. [`ROADMAP.md`](./ROADMAP.md)) этот документ будет дополнен инструкциями для worker‑сервиса.
+
 ## 1. Исправление ошибки деплоя на Vercel
 
 Главная причина ошибки деплоя (`Error: @supabase/ssr: Your project's URL and API key are required`) — отсутствие переменных окружения в настройках Vercel.
@@ -18,7 +20,7 @@
     *   **Key:** `SCANNER_MICROSERVICE_URL`
         *   **Value:** `https://scanner.n8ndo.es/scan`
     *   **Key:** `SCANNER_SECRET`
-        *   **Value:** `Crank967452`
+        *   **Value:** `your-shared-secret`
 
 5.  После добавления переменных, перейдите во вкладку **Deployments** и перезапустите деплой (Redeploy) последнего коммита. Сборка должна пройти успешно.
 

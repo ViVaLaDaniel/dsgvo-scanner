@@ -4,7 +4,8 @@
 `[|||||||||||||.]`
 
 > [!IMPORTANT]
-> **Source of Truth:** См. [00_PROJECT_REALITY.md](./00_PROJECT_REALITY.md) для актуального статуса архитектуры и функционала.
+> **Source of Truth:** См. [00_PROJECT_REALITY.md](./00_PROJECT_REALITY.md) для актуального статуса архитектуры и функционала.  
+> **Market Strategy:** См. [ROADMAP.md](./ROADMAP.md) — план стать №1 на рынке.
 
 ## Обзор
 SaaS-платформа для автоматического аудита веб-сайтов на соответствие DSGVO (GDPR). Ориентирована на специалистов по защите данных (DSB) и веб-агентства.

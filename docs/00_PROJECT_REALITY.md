@@ -16,6 +16,8 @@ The project uses a **Hybrid Architecture** to bypass Vercel's serverless timeout
   - **Execution:** Heavy scanning (Playwright) runs on a **DigitalOcean Droplet** (`scanner.n8ndo.es`).
   - **Integration:** Vercel API sends a request to the Droplet -> Droplet runs Playwright -> Returns JSON.
 
+> **Roadmap Alignment:** Следующий крупный шаг — перенос сканирования в асинхронные очереди и укрепление надежности согласно [`ROADMAP.md`](./ROADMAP.md).
+
 ## 💳 2. Payments Reality
 - **Provider:** **Paddle** (NOT Stripe).
 - **Status:** Integrated.

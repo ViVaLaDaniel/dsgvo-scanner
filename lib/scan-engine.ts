@@ -129,6 +129,37 @@ interface RemoteScanResponse {
   cookies_count?: number;
 }
 
+const REMOTE_SCAN_TIMEOUT_MS = 45000;
+const REMOTE_SCAN_MAX_RETRIES = 2;
+
+async function fetchWithTimeout(input: RequestInfo, init: RequestInit, timeoutMs: number) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function fetchWithRetry(input: RequestInfo, init: RequestInit) {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= REMOTE_SCAN_MAX_RETRIES; attempt += 1) {
+    try {
+      const response = await fetchWithTimeout(input, init, REMOTE_SCAN_TIMEOUT_MS);
+      if (!response.ok) {
+        throw new Error(`Microservice error: ${response.status} ${response.statusText}`);
+      }
+      return response;
+    } catch (error) {
+      lastError = error;
+      const delay = 500 * Math.pow(2, attempt);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  throw lastError;
+}
+
 export async function analyzeWebsite(url: string): Promise<ScanResult> {
   // CONFIGURATION:
   // If SCANNER_MICROSERVICE_URL is set (e.g. in Vercel), use it.
@@ -140,15 +171,11 @@ export async function analyzeWebsite(url: string): Promise<ScanResult> {
   if (REMOTE_SCANNER_URL) {
     console.log(`[ScanEngine] Delegating scan to microservice: ${REMOTE_SCANNER_URL}`);
     try {
-      const response = await fetch(REMOTE_SCANNER_URL, {
+      const response = await fetchWithRetry(REMOTE_SCANNER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, secret: REMOTE_SCANNER_SECRET })
       });
-
-      if (!response.ok) {
-        throw new Error(`Microservice error: ${response.status} ${response.statusText}`);
-      }
 
       const data: RemoteScanResponse = await response.json();
       
