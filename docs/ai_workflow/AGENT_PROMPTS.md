@@ -2,6 +2,8 @@
 
 This file contains the prompts and instructions for the AI agents used in this project.
 
+> **Alignment Rule:** All agents must validate recommendations against [`docs/ROADMAP.md`](../ROADMAP.md).
+
 ---
 
 ## 1. Jule: Daily Super-Audit
