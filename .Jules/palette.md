@@ -9,3 +9,11 @@
 ## 2025-05-15 - Button Icon Spacing
 **Learning:** The `Button` component uses `gap-2` for spacing between icon and text. Manually adding `mr-2` to icons results in double spacing.
 **Action:** Remove `mr-2` or margin classes from icons when using them inside the standard `Button` component.
+
+## 2025-05-24 - Form Label Consistency
+**Learning:** Native `<label>` elements lack the accessibility features and consistent styling of the `@radix-ui/react-label` primitive used in the design system.
+**Action:** Always use the `Label` component from `@/components/ui/label` instead of native `<label>` tags in forms.
+
+## 2025-05-24 - Input Adornment Buttons
+**Learning:** Using raw `<button>` elements for input adornments (like password toggle) breaks focus ring consistency. The `Button` component with `variant="ghost" size="icon"` provides the correct focus states.
+**Action:** Use `Button` for input actions, positioning it absolutely with `right-0 top-0 h-full` to align perfectly with input height.
