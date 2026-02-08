@@ -21,7 +21,7 @@
 
 Проект построен на базе самых современных технологий для обеспечения максимальной производительности и SEO:
 
-- **Frontend**: [Next.js 15+](https://nextjs.org/) (App Router, React 19)
+- **Frontend**: [Next.js 16.1.3](https://nextjs.org/) (App Router, React 19)
 - **Styling**: [Tailwind CSS 4](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 - **Backend & Auth**: [Supabase](https://supabase.com/) (PostgreSQL + RLS)

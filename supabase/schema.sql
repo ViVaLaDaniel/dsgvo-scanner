@@ -172,7 +172,93 @@ BEGIN
   END IF;
 END $$;
 
--- 4) Функция автосоздания профиля при регистрации
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'scans'
+      AND policyname = 'Users can update own scans'
+  ) THEN
+    CREATE POLICY "Users can update own scans"
+      ON public.scans
+      FOR UPDATE
+      USING (
+        EXISTS (
+          SELECT 1
+          FROM public.websites w
+          WHERE w.id = scans.website_id
+            AND w.owner_id = auth.uid()
+        )
+      )
+      WITH CHECK (
+        EXISTS (
+          SELECT 1
+          FROM public.websites w
+          WHERE w.id = scans.website_id
+            AND w.owner_id = auth.uid()
+        )
+      );
+  END IF;
+END $$;
+
+-- 4) Таблица агентств (White-Label)
+CREATE TABLE IF NOT EXISTS public.agencies (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  owner_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  name TEXT NOT NULL,
+  logo_url TEXT,
+  brand_color TEXT NOT NULL DEFAULT '#2563eb',
+  contact_email TEXT,
+  report_footer TEXT NOT NULL DEFAULT 'Professionelles DSGVO-Monitoring',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT unique_agency_owner UNIQUE (owner_id)
+);
+
+ALTER TABLE public.agencies ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'agencies'
+      AND policyname = 'Users can view own agency'
+  ) THEN
+    CREATE POLICY "Users can view own agency"
+      ON public.agencies
+      FOR SELECT
+      USING (auth.uid() = owner_id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'agencies'
+      AND policyname = 'Users can insert own agency'
+  ) THEN
+    CREATE POLICY "Users can insert own agency"
+      ON public.agencies
+      FOR INSERT
+      WITH CHECK (auth.uid() = owner_id);
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'agencies'
+      AND policyname = 'Users can update own agency'
+  ) THEN
+    CREATE POLICY "Users can update own agency"
+      ON public.agencies
+      FOR UPDATE
+      USING (auth.uid() = owner_id)
+      WITH CHECK (auth.uid() = owner_id);
+  END IF;
+END $$;
+
+-- 5) Функция автосоздания профиля при регистрации
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
