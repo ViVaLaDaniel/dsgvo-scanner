@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -141,8 +142,9 @@ export default function WebsitesPage() {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">Website URL</label>
+              <Label htmlFor="website-url" className="text-sm font-bold text-slate-700">Website URL</Label>
               <Input
+                id="website-url"
                 {...register('url')}
                 placeholder="https://example.com"
                 className={cn("bg-white border-slate-200", errors.url && "border-red-500")}
@@ -151,8 +153,9 @@ export default function WebsitesPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">Mandantenname</label>
+              <Label htmlFor="client-name" className="text-sm font-bold text-slate-700">Mandantenname</Label>
               <Input
+                id="client-name"
                 {...register('client_name')}
                 placeholder="Mustermann GmbH"
                 className={cn("bg-white border-slate-200", errors.client_name && "border-red-500")}
