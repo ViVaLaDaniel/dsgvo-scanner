@@ -9,3 +9,7 @@
 ## 2025-05-15 - Button Icon Spacing
 **Learning:** The `Button` component uses `gap-2` for spacing between icon and text. Manually adding `mr-2` to icons results in double spacing.
 **Action:** Remove `mr-2` or margin classes from icons when using them inside the standard `Button` component.
+
+## 2025-05-15 - Form Accessibility Pattern
+**Learning:** Raw `<label>` elements often miss `htmlFor` attributes, breaking screen reader association. The project's `<Label>` component enforces consistent styling but still requires manual `htmlFor` linkage to input `id`s.
+**Action:** Always use `<Label htmlFor="id">` paired with `<Input id="id">` instead of raw HTML labels.

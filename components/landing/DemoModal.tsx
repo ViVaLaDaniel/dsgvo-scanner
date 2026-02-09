@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Send, CheckCircle2 } from 'lucide-react';
 
@@ -14,6 +15,7 @@ interface DemoModalProps {
 
 export function DemoModal({ isOpen, onClose }: DemoModalProps) {
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -23,13 +25,19 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+
     // Simulate API call
     console.log('Demo Request:', formData);
-    setIsSubmitted(true);
+
     setTimeout(() => {
-      setIsSubmitted(false);
-      onClose();
-    }, 3000);
+      setIsLoading(false);
+      setIsSubmitted(true);
+      setTimeout(() => {
+        setIsSubmitted(false);
+        onClose();
+      }, 3000);
+    }, 1500);
   };
 
   return (
@@ -53,58 +61,67 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
         <form onSubmit={handleSubmit} className="space-y-4 pt-4 text-slate-900 font-bold">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-black uppercase tracking-tight text-slate-500 ml-1">Name</label>
+              <Label htmlFor="demo-name" className="text-xs font-black uppercase tracking-tight text-slate-500 ml-1">Name</Label>
               <Input 
+                id="demo-name"
                 required
                 placeholder="Stefan Meier" 
                 className="rounded-xl border-slate-200 focus:ring-blue-500 h-11 bg-white/50"
                 value={formData.name}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, name: e.target.value})}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-black uppercase tracking-tight text-slate-500 ml-1">Firma</label>
+              <Label htmlFor="demo-company" className="text-xs font-black uppercase tracking-tight text-slate-500 ml-1">Firma</Label>
               <Input 
+                id="demo-company"
                 required
                 placeholder="Meier Consulting" 
                 className="rounded-xl border-slate-200 focus:ring-blue-500 h-11 bg-white/50"
                 value={formData.company}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, company: e.target.value})}
+                disabled={isLoading}
               />
             </div>
           </div>
           
           <div className="space-y-1.5">
-            <label className="text-xs font-black uppercase tracking-tight text-slate-500 ml-1">E-Mail Adresse</label>
+            <Label htmlFor="demo-email" className="text-xs font-black uppercase tracking-tight text-slate-500 ml-1">E-Mail Adresse</Label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" aria-hidden="true" />
               <Input 
+                id="demo-email"
                 required
                 type="email"
                 placeholder="stefan@meier.de" 
                 className="pl-10 rounded-xl border-slate-200 focus:ring-blue-500 h-11 bg-white/50"
                 value={formData.email}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, email: e.target.value})}
+                disabled={isLoading}
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-black uppercase tracking-tight text-slate-500 ml-1">Nachricht (Optional)</label>
+            <Label htmlFor="demo-message" className="text-xs font-black uppercase tracking-tight text-slate-500 ml-1">Nachricht (Optional)</Label>
             <Textarea 
+              id="demo-message"
               placeholder="Ich interessiere mich für die White-Label Reports..." 
               className="rounded-xl border-slate-200 focus:ring-blue-500 min-h-[100px] bg-white/50 resize-none"
               value={formData.message}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({...formData, message: e.target.value})}
+              disabled={isLoading}
             />
           </div>
 
           <Button 
             type="submit"
+            isLoading={isLoading}
             className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 font-black shadow-lg shadow-blue-500/20 mt-4 group"
           >
             Jetzt Demo anfragen
-            <Send className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            {!isLoading && <Send className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />}
           </Button>
 
           <p className="text-[10px] text-center text-slate-400 font-medium px-4">
