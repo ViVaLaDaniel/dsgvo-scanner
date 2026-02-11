@@ -9,3 +9,7 @@
 ## 2025-05-15 - Button Icon Spacing
 **Learning:** The `Button` component uses `gap-2` for spacing between icon and text. Manually adding `mr-2` to icons results in double spacing.
 **Action:** Remove `mr-2` or margin classes from icons when using them inside the standard `Button` component.
+
+## 2026-02-11 - Input Adornment Consistency
+**Learning:** Native `<label>` elements lack the design system's standardized styling and accessibility features provided by the `Label` component (`@/components/ui/label`). Also, custom buttons for input actions (like password toggles) are inconsistent.
+**Action:** Always replace native `<label>` with `<Label>` in forms, and use `<Button variant="ghost" size="icon">` for input adornments.
