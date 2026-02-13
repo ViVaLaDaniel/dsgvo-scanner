@@ -104,7 +104,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
             className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 font-black shadow-lg shadow-blue-500/20 mt-4 group"
           >
             Jetzt Demo anfragen
-            <Send className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <Send className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
 
           <p className="text-[10px] text-center text-slate-400 font-medium px-4">

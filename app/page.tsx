@@ -121,7 +121,12 @@ export default function HomePage() {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Button variant="ghost" onClick={() => setIsMenuOpen(!isMenuOpen)} className="relative h-8 w-8 p-0">
+            <Button
+              variant="ghost"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="relative h-8 w-8 p-0"
+              aria-label={isMenuOpen ? "Menü schließen" : "Menü öffnen"}
+            >
               <AnimatePresence initial={false} mode="wait">
                 <motion.div
                   key={isMenuOpen ? 'x' : 'menu'}
@@ -210,7 +215,7 @@ export default function HomePage() {
               className="text-lg px-8 py-7 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 transition-all group"
             >
               Jetzt testen (Dev Mode)
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button 
               size="lg" 
