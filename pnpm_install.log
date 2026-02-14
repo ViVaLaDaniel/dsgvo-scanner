@@ -5,22 +5,22 @@ Packages: +725
 
    ╭──────────────────────────────────────────╮
    │                                          │
-   │   Update available! 10.28.0 → 10.29.1.   │
-   │   Changelog: https://pnpm.io/v/10.29.1   │
+   │   Update available! 10.28.0 → 10.29.3.   │
+   │   Changelog: https://pnpm.io/v/10.29.3   │
    │     To update, run: pnpm add -g pnpm     │
    │                                          │
    ╰──────────────────────────────────────────╯
 
-Progress: resolved 725, reused 0, downloaded 12, added 0
-Progress: resolved 725, reused 0, downloaded 97, added 53
-Progress: resolved 725, reused 0, downloaded 183, added 177
-Progress: resolved 725, reused 0, downloaded 214, added 193
-Progress: resolved 725, reused 0, downloaded 223, added 196
-Progress: resolved 725, reused 0, downloaded 225, added 196
-Progress: resolved 725, reused 0, downloaded 236, added 200
-Progress: resolved 725, reused 0, downloaded 237, added 200
-Progress: resolved 725, reused 0, downloaded 337, added 242
-Progress: resolved 725, reused 0, downloaded 504, added 415
+Progress: resolved 725, reused 0, downloaded 14, added 0
+Progress: resolved 725, reused 0, downloaded 112, added 76
+Progress: resolved 725, reused 0, downloaded 213, added 193
+Progress: resolved 725, reused 0, downloaded 223, added 198
+Progress: resolved 725, reused 0, downloaded 232, added 202
+Progress: resolved 725, reused 0, downloaded 245, added 206
+Progress: resolved 725, reused 0, downloaded 246, added 206
+Progress: resolved 725, reused 0, downloaded 329, added 250
+Progress: resolved 725, reused 0, downloaded 457, added 455
+Progress: resolved 725, reused 0, downloaded 672, added 672
 Progress: resolved 725, reused 0, downloaded 725, added 725, done
  WARN  Failed to create bin at /app/node_modules/.pnpm/supabase@2.75.0/node_modules/supabase/node_modules/.bin/supabase. ENOENT: no such file or directory, open '/app/node_modules/.pnpm/supabase@2.75.0/node_modules/supabase/bin/supabase'
  WARN  Failed to create bin at /app/node_modules/.bin/supabase. ENOENT: no such file or directory, open '/app/node_modules/.pnpm/supabase@2.75.0/node_modules/supabase/bin/supabase'
@@ -85,4 +85,4 @@ devDependencies:
 │   to run scripts.                                                            │
 │                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────╯
-Done in 14.8s using pnpm v10.28.0
+Done in 13.9s using pnpm v10.28.0

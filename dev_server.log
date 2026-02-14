@@ -7,6 +7,28 @@
 - Network:       http://192.168.0.2:3000
 
 ✓ Starting...
-✓ Ready in 1693ms
-○ Compiling /register ...
- GET /register 200 in 5.2s (compile: 4.5s, proxy.ts: 247ms, render: 444ms)
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1297ms
+○ Compiling /login ...
+ GET /login 200 in 4.4s (compile: 3.8s, proxy.ts: 136ms, render: 440ms)
+ GET /login 200 in 1296ms (compile: 481ms, proxy.ts: 149ms, render: 666ms)
+○ Compiling / ...
+ GET / 200 in 5.4s (compile: 5.0s, proxy.ts: 9ms, render: 383ms)
+ GET / 200 in 104ms (compile: 7ms, proxy.ts: 6ms, render: 91ms)
+ GET / 200 in 159ms (compile: 46ms, proxy.ts: 9ms, render: 103ms)
+ GET / 200 in 149ms (compile: 16ms, proxy.ts: 6ms, render: 127ms)
+ GET /login 200 in 268ms (compile: 9ms, proxy.ts: 14ms, render: 246ms)
+ GET /login 200 in 209ms (compile: 8ms, proxy.ts: 13ms, render: 188ms)
+ GET /login 200 in 85ms (compile: 5ms, proxy.ts: 7ms, render: 72ms)
+ GET /register 200 in 1165ms (compile: 1030ms, proxy.ts: 22ms, render: 113ms)
+ GET /login 200 in 164ms (compile: 19ms, proxy.ts: 7ms, render: 138ms)
+ GET /apple-touch-icon.png 404 in 785ms (compile: 134ms, render: 650ms)
+ GET /login 200 in 209ms (compile: 23ms, proxy.ts: 11ms, render: 174ms)
+ GET /apple-touch-icon.png 404 in 129ms (compile: 30ms, render: 98ms)
+ GET /login 200 in 96ms (compile: 8ms, proxy.ts: 5ms, render: 83ms)
+ GET /register 200 in 137ms (compile: 12ms, proxy.ts: 10ms, render: 115ms)
+ GET /apple-touch-icon.png 404 in 119ms (compile: 14ms, render: 105ms)
+ GET /login 200 in 247ms (compile: 6ms, proxy.ts: 13ms, render: 229ms)
+ GET /login 200 in 239ms (compile: 28ms, proxy.ts: 6ms, render: 205ms)
+ GET /login 200 in 176ms (compile: 17ms, proxy.ts: 8ms, render: 151ms)
+ GET /register 200 in 115ms (compile: 24ms, proxy.ts: 26ms, render: 65ms)

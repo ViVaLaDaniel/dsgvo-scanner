@@ -90,10 +90,12 @@ export default function LoginPage() {
                   required
                   className="bg-slate-50 border-slate-200 focus:bg-white transition-all pr-10"
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md"
+                  className="absolute right-0 top-0 h-full w-10 text-slate-500 hover:text-slate-700"
                   aria-label={showPassword ? "Passwort verbergen" : "Passwort anzeigen"}
                 >
                   {showPassword ? (
@@ -101,7 +103,7 @@ export default function LoginPage() {
                   ) : (
                     <Eye className="h-4 w-4" />
                   )}
-                </button>
+                </Button>
               </div>
             </div>
 
