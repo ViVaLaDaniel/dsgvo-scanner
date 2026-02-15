@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -148,7 +149,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
               {view === 'register' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label htmlFor="register-name" className="text-sm font-bold text-slate-700">Vorname</label>
+                    <Label htmlFor="register-name" className="text-sm font-bold text-slate-700">Vorname</Label>
                     <Input
                       id="register-name"
                       placeholder="Stefan"
@@ -159,7 +160,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
                     />
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="register-company" className="text-sm font-bold text-slate-700">Unternehmen</label>
+                    <Label htmlFor="register-company" className="text-sm font-bold text-slate-700">Unternehmen</Label>
                     <Input
                       id="register-company"
                       placeholder="Meier GmbH"
@@ -173,7 +174,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
               )}
 
               <div className="space-y-2">
-                <label htmlFor="auth-email" className="text-sm font-bold text-slate-700">E-Mail Adresse</label>
+                <Label htmlFor="auth-email" className="text-sm font-bold text-slate-700">E-Mail Adresse</Label>
                 <Input
                   id="auth-email"
                   type="email"
@@ -187,7 +188,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
 
               {view === 'login' && (
                 <div className="space-y-2">
-                  <label htmlFor="login-password" className="text-sm font-bold text-slate-700">Passwort</label>
+                  <Label htmlFor="login-password" className="text-sm font-bold text-slate-700">Passwort</Label>
                   <div className="relative">
                     <Input
                       id="login-password"
@@ -198,10 +199,12 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
                       required
                       className="bg-white/50 border-slate-200 focus:ring-blue-500/20 rounded-xl pr-10"
                     />
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md"
+                      className="absolute right-0 top-0 h-full w-10 text-slate-500 hover:text-slate-700 hover:bg-transparent"
                       aria-label={showPassword ? "Passwort verbergen" : "Passwort anzeigen"}
                     >
                       {showPassword ? (
@@ -209,7 +212,7 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
                       ) : (
                         <Eye className="h-4 w-4" />
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
