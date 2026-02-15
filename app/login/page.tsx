@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { createClient } from '@/lib/supabase/client';
@@ -62,9 +63,9 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-semibold text-slate-700">
+              <Label htmlFor="email" className="text-sm font-semibold text-slate-700">
                 E-Mail
-              </label>
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -77,9 +78,9 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-semibold text-slate-700">
+              <Label htmlFor="password" className="text-sm font-semibold text-slate-700">
                 Passwort
-              </label>
+              </Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -94,6 +95,7 @@ export default function LoginPage() {
                   type="button"
                   variant="ghost"
                   size="icon"
+
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-0 top-0 h-full w-10 text-slate-500 hover:text-slate-700"
                   aria-label={showPassword ? "Passwort verbergen" : "Passwort anzeigen"}
