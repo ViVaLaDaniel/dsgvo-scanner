@@ -77,6 +77,7 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                   </Badge>
                   <CardTitle className="text-2xl font-black text-slate-900">{selectedSolution.title}</CardTitle>
                 </div>
+<<<<<<< HEAD
                 <Button
                   variant="ghost"
                   size="icon"
@@ -108,7 +109,7 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                  <div>
                     <p className="text-sm font-bold text-amber-900">Pro-Tipp vom DSB</p>
                     <p className="text-sm text-amber-700 font-medium italic mt-1 leading-relaxed">
-                      &quot;Stellen Sie sicher, dass alle externen Ressourcen lokal gehostet werden или erst nach einer Einwilligung geladen werden.&quot;
+                      &quot;Stellen Sie sicher, dass alle externen Ressourcen lokal gehostet werden oder erst nach einer Einwilligung geladen werden.&quot;
                     </p>
                  </div>
               </div>
@@ -134,6 +135,7 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div className="flex items-center gap-4">
+<<<<<<< HEAD
           <Button
             variant="ghost"
             size="icon"
@@ -289,7 +291,8 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                         "p-2 md:p-3 rounded-xl md:rounded-2xl",
                         finding.severity === 'high' ? "bg-red-100 text-red-600" : finding.severity === 'medium' ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"
                       )}>
-                        <AlertCircle className="h-5 w-5 md:h-6 w-6" />
+<<<<<<< HEAD
+                        <AlertCircle className="h-5 w-5 md:h-6 md:w-6" />
                       </div>
                       <div className="flex flex-col md:items-center">
                         <span className={cn(
