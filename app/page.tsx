@@ -64,7 +64,7 @@ export default function HomePage() {
             "name": "DSGVO Scanner",
             "operatingSystem": "Web",
             "applicationCategory": "BusinessApplication",
-            "description": "Automatisierte DSGVO-Audits für Agenturen und Datenschutzbeauftragte.",
+            "description": "Automatisierte DSGVO-Audits für Agenturen и Datenschutzbeauftragte.",
             "offers": {
               "@type": "Offer",
               "price": "49.00",
@@ -127,10 +127,7 @@ export default function HomePage() {
               className="relative h-8 w-8 p-0"
               aria-label={isMenuOpen ? "Menü schließen" : "Hauptmenü öffnen"}
               aria-expanded={isMenuOpen}
-
               aria-controls="mobile-menu"
-=======
-
             >
               <AnimatePresence initial={false} mode="wait">
                 <motion.div

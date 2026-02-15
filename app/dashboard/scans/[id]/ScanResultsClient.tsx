@@ -85,7 +85,9 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                   aria-label="Lösungsweg schließen"
                   title="Schließen"
                 >
-
+                  <X className="h-6 w-6 text-slate-400" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
               <div className="space-y-4">
@@ -106,7 +108,7 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                  <div>
                     <p className="text-sm font-bold text-amber-900">Pro-Tipp vom DSB</p>
                     <p className="text-sm text-amber-700 font-medium italic mt-1 leading-relaxed">
-                      &quot;Stellen Sie sicher, dass alle externen Ressourcen lokal gehostet werden oder erst nach einer Einwilligung geladen werden.&quot;
+                      &quot;Stellen Sie sicher, dass alle externen Ressourcen lokal gehostet werden или erst nach einer Einwilligung geladen werden.&quot;
                     </p>
                  </div>
               </div>
@@ -281,13 +283,13 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                   <div className="flex flex-col md:flex-row">
                     <div className={cn(
                       "w-full md:w-40 p-4 md:p-6 flex flex-row md:flex-col items-center justify-start md:justify-center text-left md:text-center gap-4 md:gap-2 border-b md:border-b-0 md:border-r",
-                      finding.severity === 'high' ? "bg-red-50/50" : finding.severity === 'medium' ? "bg-amber-50/50" : "bg-blue-50/50"
+                      finding.severity === 'high' ? "bg-red-50/50" : finding.severity === 'medium" ? "bg-amber-50/50" : "bg-blue-50/50"
                     )}>
                       <div className={cn(
                         "p-2 md:p-3 rounded-xl md:rounded-2xl",
                         finding.severity === 'high' ? "bg-red-100 text-red-600" : finding.severity === 'medium' ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"
                       )}>
-                        <AlertCircle className="h-5 w-5 md:h-6 md:w-6" />
+                        <AlertCircle className="h-5 w-5 md:h-6 w-6" />
                       </div>
                       <div className="flex flex-col md:items-center">
                         <span className={cn(
