@@ -126,11 +126,11 @@ export default function HomePage() {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="relative h-8 w-8 p-0"
               aria-label={isMenuOpen ? "Menü schließen" : "Hauptmenü öffnen"}
-              aria-expanded={isMenuOpen}
-              aria-controls="mobile-menu"
-            >
-              <AnimatePresence initial={false} mode="wait">
-                <motion.div
+                            aria-expanded={isMenuOpen}
+                            aria-controls="mobile-menu"
+                          >
+                            <AnimatePresence initial={false} mode="wait">
+                              <motion.div
                   key={isMenuOpen ? 'x' : 'menu'}
                   initial={{ rotate: -90, opacity: 0 }}
                   animate={{ rotate: 0, opacity: 1 }}
