@@ -77,7 +77,6 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                   </Badge>
                   <CardTitle className="text-2xl font-black text-slate-900">{selectedSolution.title}</CardTitle>
                 </div>
-<<<<<<< HEAD
                 <Button
                   variant="ghost"
                   size="icon"
@@ -135,7 +134,6 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div className="flex items-center gap-4">
-<<<<<<< HEAD
           <Button
             variant="ghost"
             size="icon"
@@ -291,7 +289,6 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                         "p-2 md:p-3 rounded-xl md:rounded-2xl",
                         finding.severity === 'high' ? "bg-red-100 text-red-600" : finding.severity === 'medium' ? "bg-amber-100 text-amber-600" : "bg-blue-100 text-blue-600"
                       )}>
-<<<<<<< HEAD
                         <AlertCircle className="h-5 w-5 md:h-6 md:w-6" />
                       </div>
                       <div className="flex flex-col md:items-center">
