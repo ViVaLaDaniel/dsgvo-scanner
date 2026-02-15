@@ -7,8 +7,12 @@
 **Action:** Use `isLoading={loading}` instead of conditional text rendering for all async actions.
 
 ## 2025-05-15 - Button Icon Spacing
-**Learning:** The `Button` component uses `gap-2` for spacing between icon and text. Manually adding `mr-2` or `ml-2` to icons results in double spacing.
-**Action:** Remove `mr-2` or `ml-2` from icons when using them inside the standard `Button` component.
+**Learning:** The `Button` component uses `gap-2` for spacing between icon and text. Manually adding `mr-2` to icons results in double spacing.
+**Action:** Remove `mr-2` or margin classes from icons when using them inside the standard `Button` component.
+
+## 2025-05-15 - Form Accessibility Pattern
+**Learning:** Raw `<label>` elements often miss `htmlFor` attributes, breaking screen reader association. The project's `<Label>` component enforces consistent styling but still requires manual `htmlFor` linkage to input `id`s.
+**Action:** Always use `<Label htmlFor="id">` paired with `<Input id="id">` instead of raw HTML labels.
 
 ## 2025-05-15 - Icon-Only Button Accessibility
 **Learning:** Icon-only buttons (like mobile menu toggles) are invisible to screen readers without an accessible name.
