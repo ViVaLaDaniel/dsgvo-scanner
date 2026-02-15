@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - SCANNER_MICROSERVICE_URL=http://scanner:3001
+      - SCANNER_SECRET=my-secret-key # Replace with a real secret in production
+    depends_on:
+      - scanner
+
+  scanner:
+    image: node:18-slim
+    working_dir: /app
+    volumes:
+      - ./scanner:/app
+    command: >
+      sh -c "npm install && npm start"
+    ports:
+      - "3001:3001"

@@ -9,6 +9,7 @@
 1.  **Documentation First:** I am FORBIDDEN from finishing a session without updating the documentation (`CHANGELOG.md`, `.ai/CURRENT_PLAN.md`).
 2.  **Gatekeeper:** I must verify code from Jules before confirming to the user.
 3.  **Memory:** I must check previous session logs to maintain continuity.
+4.  **Docker & Testing:** Ensure the Docker setup is functional and the load testing script is runnable.
 
 ## 2. WORKFLOW ENFORCEMENT
 1.  **Start:** Ensure `scripts/start_work.ps1` was run.

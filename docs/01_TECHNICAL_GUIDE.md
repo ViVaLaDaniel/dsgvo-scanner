@@ -13,7 +13,7 @@
 - **Backend/DB:** Supabase (Auth, PostgreSQL, Row Level Security).
 - **Scanner Engine:** Playwright (Chromium) для глубокого динамического анализа.
 - **Reporting:** `@react-pdf/renderer` для генерации White-Label PDF-отчетов.
-- **Infrastructure:** Vercel (Deployment), GitHub Actions (CI/CD).
+- **Infrastructure:** Vercel (Deployment), GitHub Actions (CI/CD), Docker (Local Development).
 
 ---
 
@@ -89,8 +89,9 @@
 ---
 
 ## 🛠 Разработка и Тестирование
-- **Локальный запуск:** `npm run dev` и `npx supabase start`.
+- **Локальный запуск (без Docker):** `npm run dev` и `npx supabase start`.
     - *Примечание для Windows:* Если возникает ошибка 502, отключите `analytics` в `supabase/config.toml`.
+- **Локальный запуск (с Docker):** Для запуска всего проекта (Next.js + Mock Scanner Microservice) используйте `docker-compose up --build`. Убедитесь, что переменные окружения, включая `SCANNER_SECRET`, настроены в `.env.local`.
 - **Тесты (Vitest):** `npm test`. Модульные тесты находятся в `__tests__/unit/`. Они используют моки для Playwright, чтобы проверять логику анализатора без реального запуска браузера.
 - **Сборка:** `npm run build` (используется для проверки перед деплоем на Vercel).
 

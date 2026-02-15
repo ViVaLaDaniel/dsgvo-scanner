@@ -1,0 +1,12 @@
+{
+  "name": "mock-scanner",
+  "version": "1.0.0",
+  "description": "A mock scanner service for local development.",
+  "main": "scanner.js",
+  "scripts": {
+    "start": "node scanner.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

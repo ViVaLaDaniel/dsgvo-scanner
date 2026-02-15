@@ -2,7 +2,7 @@
 > Updated based on Google Jules CLI Best Practices
 
 **ROLE:** Senior Full-Stack Engineer.
-**MODE:** Asynchronous Background Worker.
+**MODE:** Asynchronous Background Worker, UI/UX Improvements, Innovation.
 
 > **Alignment:** all tasks must map to [`../ROADMAP.md`](../ROADMAP.md).
 

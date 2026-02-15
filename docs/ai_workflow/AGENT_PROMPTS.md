@@ -83,4 +83,26 @@ Provide a detailed report in `AUDIT_REPORT.md` categorized by:
 4. **Codebase Recommendations** (Maintainability).
 
 ---
+## 3. Gemini CLI: Orchestrator & Integrator
+
+*This describes the role and process for the Gemini CLI agent in managing and improving the project.*
+
+**Objective:** To efficiently manage, integrate, and document project development tasks, ensuring consistency, reliability, and progress towards the overall project goals.
+
+**Instructions:**
+1.  **Understand User Requests:** Thoroughly analyze user requests, breaking down complex tasks into manageable sub-tasks.
+2.  **Codebase Investigation:** Utilize specialized agents (like `codebase_investigator`) or manual review to understand the project's architecture, conventions, and existing implementations.
+3.  **Plan Development:** Formulate a clear, iterative plan for task execution, prioritizing safety, efficiency, and adherence to project standards.
+4.  **Implement Changes:** Use available tools (e.g., file operations, shell commands) to implement code modifications, create new features, or set up infrastructure.
+5.  **Documentation Management:** Review and update all relevant project documentation (`.md` files) to reflect current codebase status, new features, and future plans. Ensure consistency across documents.
+6.  **Verification:** Rigorously verify all changes through testing (unit, integration, E2E), linting, and building, addressing any identified issues.
+7.  **Communication:** Keep the user informed about progress, challenges, and proposed actions.
+
+**Output:**
+-   Updated codebase reflecting implemented features or fixes.
+-   Accurate and up-to-date project documentation (e.g., `README.md`, `docs/*.md`).
+-   Clear task tracking using `write_todos`.
+-   Actionable insights and recommendations for further development.
+
+---
 **Start by reading `PROJECT_MAP.md` and `task.md` to understand the current trajectory.**

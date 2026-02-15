@@ -1,7 +1,7 @@
 # Карта проекта DSGVO Scanner (Master Roadmap)
 
-**Ready: 🚀 95% (Release Candidate)**
-`[|||||||||||||.]`
+**Ready: 🚀 80% (Beta)**
+`[||||||||||||..]`
 
 > [!IMPORTANT]
 > **Source of Truth:** См. [00_PROJECT_REALITY.md](./00_PROJECT_REALITY.md) для актуального статуса архитектуры и функционала.  
@@ -66,10 +66,12 @@ SaaS-платформа для автоматического аудита ве�
 - [x] **Тарифные планы:** Starter, Professional, Business.
 - [x] **Subscription Logic:** Обновление лимитов в БД при оплате.
 
-## 🛠 ФАЗА 5: Инфраструктура и DevOps (Done)
+## 🛠 ФАЗА 5: Инфраструктура и DevOps (In Progress)
 - [x] **CI/CD:** GitHub Actions -> Vercel.
 - [x] **Тестирование:** Vitest + Playwright.
 - [x] **Локация серверов:** Frankfurt `fra1`.
+- [ ] **Docker-окружение:** Создание `Dockerfile` и `docker-compose.yml`.
+- [ ] **Нагрузочное тестирование:** Разработка скрипта для проверки производительности.
 
 ## 🛡️ ФАЗА 6: Безопасность (In Progress)
 - [x] **RLS Audit:** Выполнено.
@@ -85,5 +87,7 @@ SaaS-платформа для автоматического аудита ве�
 
 ---
 **Next Steps Priority:**
-1. Создать AGB.
-2. Спроектировать Scanner 2.0.
+1.  **Legal:** Create AGB page.
+2.  **Scanner Upgrade:** Implement "Scanner 110%" specs (Deep Crawl, Interaction, etc.).
+3.  **Infrastructure:** Create Docker setup for local development and testing.
+4.  **Load Testing:** Develop and run load tests for the scanner.

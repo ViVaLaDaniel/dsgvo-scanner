@@ -33,6 +33,7 @@ The project uses a **Hybrid Architecture** to bypass Vercel's serverless timeout
 | **Detection** | Network, Cookies, HTML Regex | + LocalStorage, Pixel tracking, Dynamic script injection |
 | **Evidence** | Text logs | **Screenshots** of violations |
 | **Performance** | Hybrid (Fast) | Queued (BullMQ for multi-page jobs) |
+| **Remote Scan**| Fragile string-based mapping | Structured JSON |
 
 ## ⚖️ 4. Legal Status
 - **Impressum:** ✅ Done (`app/impressum/page.tsx`) - Needs final address check.
@@ -44,5 +45,7 @@ The project uses a **Hybrid Architecture** to bypass Vercel's serverless timeout
 
 ## 🛠️ 5. Next Steps (Priority)
 1.  **Legal:** Create AGB page.
-2.  **Scanner Upgrade:** Implement "Scanner 110%" specs (Deep Crawl, Interaction).
-3.  **Stability:** Ensure DigitalOcean worker is running the latest code.
+2.  **Scanner Upgrade:** Implement "Scanner 110%" specs (Deep Crawl, Interaction, etc.).
+3.  **Infrastructure:** Create Docker setup for local development and testing.
+4.  **Load Testing:** Develop and run load tests for the scanner.
+5.  **Stability:** Ensure DigitalOcean worker is running the latest code.

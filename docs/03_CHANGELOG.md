@@ -9,8 +9,13 @@
 ## [Unreleased]
 ### Added
 - **Market Leader Roadmap**: единая стратегия и фазы роста до №1 позиции.
+- **Docker Environment**: Создан `Dockerfile`, `docker-compose.yml` и мок-сервис сканера для локального запуска проекта.
+- **Load Testing Script**: Разработан базовый скрипт для нагрузочного тестирования сканера в Docker-окружении.
+
 ### Changed
 - Документация синхронизирована с Roadmap (ссылки и направления).
+- **Documentation Updates**: Обновлены `README.md`, `docs/task.md`, `docs/00_PROJECT_REALITY.md`, `docs/PROJECT_MAP.md`, `docs/01_TECHNICAL_GUIDE.md` и `docs/02_PROJECT_JOURNAL.md` для отражения текущего состояния проекта и новых задач.
+- **Branch Synchronization**: Проанализированы, валидированы и объединены все полезные удаленные ветки в `main`. Устаревшие или нефункциональные ветки удалены.
 
 ## [0.2.0] - 2026-02-01
 ### Added

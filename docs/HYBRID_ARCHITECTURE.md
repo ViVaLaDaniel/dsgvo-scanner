@@ -26,7 +26,6 @@ These must be set in Vercel Project Settings for the Production Environment:
 | `NEXT_PUBLIC_SUPABASE_URL` | *from Supabase* | Connection to DB |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | *from Supabase* | Connection to DB |
 | `SCANNER_MICROSERVICE_URL` | `https://scanner.n8ndo.es/scan` | Pointing to our Droplet |
-| `SCANNER_MICROSERVICE_URL` | `https://scanner.n8ndo.es/scan` | Pointing to our Droplet |
 | `SCANNER_SECRET` | `Crank967452` | **Active Secret** (Must match Droplet) |
 
 ---
@@ -59,6 +58,7 @@ COPY index.js .
 EXPOSE 4000
 CMD ["node", "index.js"]
 ```
+> **Примечание:** Этот `Dockerfile` является общим примером для микросервиса сканера. Для реального развертывания может потребоваться более специализированный образ, содержащий только необходимую логику сканирования из этого проекта.
 
 **Run Command:**
 ```bash
@@ -102,3 +102,9 @@ docker compose restart caddy
 4.  Droplet spins up Headless Chrome, visits site, collects data.
 5.  Droplet returns JSON results to Next.js.
 6.  Next.js saves results to Supabase and shows them to the user.
+
+---
+
+## 🐳 Локальная разработка с Docker
+
+Для локальной разработки и тестирования гибридной архитектуры, включая мок-сервис сканера, используйте `docker-compose`. Подробные инструкции по настройке и запуску находятся в [`README.md`](./README.md) в разделе "🐳 Локальная разработка с Docker".
