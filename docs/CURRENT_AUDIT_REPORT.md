@@ -19,8 +19,8 @@
 Следующие аспекты кодовой базы полностью соответствуют документации и были успешно верифицированы:
 
 *   **Технологический стек:** Все заявленные ключевые технологии (Next.js 16+, React 19, Tailwind CSS 4, Shadcn/UI, Playwright, Paddle, Supabase, @react-pdf/renderer) подтверждены в `package.json` и их использовании.
-*   **Реализация удаленного сканера:** Файл `lib/scan-engine.ts` корректно использует `chromium.connectOverCDP` с переменной окружения `BROWSER_WSE_ENDPOINT`, что обеспечивает работу сканера на Vercel через `Browserless.io`.
-*   **Безопасность базы данных (RLS):** В `supabase/schema.sql` реализованы строгие политики Row Level Security для таблиц `user_profiles`, `websites`, `scans`, `agencies`, гарантирующие полную изоляцию данных между пользователями.
+*   **Реализация удаленного сканера:** Файл `lib/scan-engine.ts` использует `SCANNER_MICROSERVICE_URL` и `SCANNER_SECRET` для делегирования сканирования микросервису.
+*   **Безопасность базы данных (RLS):** В `supabase/schema.sql` реализованы политики Row Level Security для таблиц `user_profiles`, `websites`, `scans`, `agencies`, гарантирующие изоляцию данных между пользователями.
 *   **Интеграция с платежной системой Paddle:** Полностью реализован как клиентский `PaddleProvider.tsx`, так и серверный вебхук (`app/api/webhooks/paddle/route.ts`), обеспечивающий автоматическое обновление лимитов подписки.
 *   **White-Label брендинг:** Функциональность брендирования для PDF-отчетов реализована в полном объеме: настройка через `app/dashboard/settings/page.tsx` и использование данных (`logo_url`, `brand_color`, `report_footer`) в `components/reporting/ScanReportPDF.tsx`, данные хранятся в таблице `agencies`.
 *   **Архитектура кода (Custom Hooks):** Бизнес-логика успешно абстрагирована в кастомные хуки (`useSettings`, `useWebsites`, `useScanner`), что подтверждено их наличием в `lib/hooks/` и использованием в компонентах панели управления.

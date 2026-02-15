@@ -14,7 +14,7 @@
     - [x] Интеграция SDK на фронтенде.
     - [x] Webhook route для синхронизации подписок.
     - [x] Обновление схемы БД для хранения статуса плана.
-- [x] **Scanner Compatibility**: Добавлена поддержка `BROWSER_WSE_ENDPOINT` для работы на Vercel.
+- [x] **Scanner Compatibility**: Добавлен удалённый микросервис через `SCANNER_MICROSERVICE_URL`.
 - [x] **UI Localization**: 100% немецкий язык. Исправлены опечатки ("Fußzeile", "большие").
 - [x] **Limits Enforcement**: 
     - [x] Проверка лимитов на Dashboard.
@@ -40,8 +40,8 @@
 ---
 
 ### ⚠️ ВАЖНО: Настройка Vercel (Обязательно!)
-Для работы сканера на Vercel добавьте этот ключ:
-`BROWSER_WSE_ENDPOINT` = `wss://chrome.browserless.io?token=ВАШ_ТОКЕН_ЗДЕСЬ`
+Для работы сканера на Vercel добавьте ключи:
+`SCANNER_MICROSERVICE_URL` и `SCANNER_SECRET`
 
 ---
 *Статус проекта:* **Ready for Alpha-Testers.**
