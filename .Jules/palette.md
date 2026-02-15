@@ -41,3 +41,11 @@
 ## 2026-02-11 - Input Adornment Consistency
 **Learning:** Native `<label>` elements lack the design system's standardized styling and accessibility features provided by the `Label` component (`@/components/ui/label`). Also, custom buttons for input actions (like password toggles) are inconsistent.
 **Action:** Always replace native `<label>` with `<Label>` in forms, and use `<Button variant="ghost" size="icon">` for input adornments.
+
+## 2026-05-20 - Custom Dialog Close Button
+**Learning:** When using `Button` with `size="icon"` in a custom `Dialog`, you often need to override `rounded` classes if the design calls for `rounded-full` instead of the default `rounded-md`.
+**Action:** Use `className="rounded-full"` on `Button` when replacing circular icon buttons.
+
+## 2026-05-20 - Input Adornment Touch Targets
+**Learning:** For input adornments (like password toggles), using `absolute right-0 top-0 h-full w-10` provides a better touch target than centering a small button.
+**Action:** Use full-height absolute positioning for input adornment buttons.
