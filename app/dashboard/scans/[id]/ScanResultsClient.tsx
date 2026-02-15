@@ -85,10 +85,7 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                   aria-label="Lösungsweg schließen"
                   title="Schließen"
                 >
-                  <X className="h-6 w-6 text-slate-400" />
-                </Button>
-                </Button>
-              </div>
+
             </CardHeader>
             <CardContent className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
               <div className="space-y-4">
