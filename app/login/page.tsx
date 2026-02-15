@@ -95,9 +95,8 @@ export default function LoginPage() {
                   type="button"
                   variant="ghost"
                   size="icon"
-
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0 top-0 h-full w-10 text-slate-500 hover:text-slate-700"
+                  className="absolute right-0 top-0 h-full w-10 text-slate-500 hover:text-slate-700 hover:bg-transparent"
                   aria-label={showPassword ? "Passwort verbergen" : "Passwort anzeigen"}
                 >
                   {showPassword ? (

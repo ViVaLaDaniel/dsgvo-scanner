@@ -21,3 +21,11 @@
 ## 2025-05-15 - Form Accessibility: React Hook Form
 **Learning:** When adding standard accessibility attributes (htmlFor/id) to forms using `react-hook-form`, ensure the `id` prop is explicitly passed to the `Input` component. Also, replace raw `<label>` elements with the `Label` component to ensure consistent design system styling and accessibility behaviors.
 **Action:** Always pair `Label` (from ui/label) with `Input`, and ensure `htmlFor` matches `id`.
+
+## 2025-05-24 - Form Label Consistency
+**Learning:** Native `<label>` elements lack the accessibility features and consistent styling of the `@radix-ui/react-label` primitive used in the design system.
+**Action:** Always use the `Label` component from `@/components/ui/label` instead of native `<label>` tags in forms.
+
+## 2025-05-24 - Input Adornment Buttons
+**Learning:** Using raw `<button>` elements for input adornments (like password toggle) breaks focus ring consistency. The `Button` component with `variant="ghost" size="icon"` provides the correct focus states.
+**Action:** Use `Button` for input actions, positioning it absolutely with `right-0 top-0 h-full` to align perfectly with input height.
