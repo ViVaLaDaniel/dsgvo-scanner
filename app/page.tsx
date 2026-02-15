@@ -127,7 +127,10 @@ export default function HomePage() {
               className="relative h-8 w-8 p-0"
               aria-label={isMenuOpen ? "Menü schließen" : "Hauptmenü öffnen"}
               aria-expanded={isMenuOpen}
+
               aria-controls="mobile-menu"
+=======
+
             >
               <AnimatePresence initial={false} mode="wait">
                 <motion.div

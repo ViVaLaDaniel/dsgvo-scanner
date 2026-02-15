@@ -87,6 +87,7 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                 >
                   <X className="h-6 w-6 text-slate-400" />
                 </Button>
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="p-8 space-y-8 max-h-[70vh] overflow-y-auto">
