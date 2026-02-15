@@ -17,3 +17,7 @@
 ## 2025-05-15 - Icon-Only Button Accessibility
 **Learning:** Icon-only buttons (like mobile menu toggles) are invisible to screen readers without an accessible name.
 **Action:** Always add `aria-label` to buttons that only contain an icon.
+
+## 2025-05-15 - Form Accessibility: React Hook Form
+**Learning:** When adding standard accessibility attributes (htmlFor/id) to forms using `react-hook-form`, ensure the `id` prop is explicitly passed to the `Input` component. Also, replace raw `<label>` elements with the `Label` component to ensure consistent design system styling and accessibility behaviors.
+**Action:** Always pair `Label` (from ui/label) with `Input`, and ensure `htmlFor` matches `id`.
