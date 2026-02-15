@@ -32,26 +32,12 @@
 
 **Action:** Always pair `Label` (from ui/label) with `Input`, and ensure `htmlFor` matches `id`.
 
-
-
-## 2025-05-24 - Form Label Consistency
-
-**Learning:** Native `<label>` elements lack the accessibility features and consistent styling of the `@radix-ui/react-label` primitive used in the design system.
-
-**Action:** Always use the `Label` component from `@/components/ui/label` instead of native `<label>` tags in forms.
-
-
-
-## 2025-05-24 - Input Adornment Buttons
-
-**Learning:** Using raw `<button>` elements for input adornments (like password toggle) breaks focus ring consistency. The `Button` component with `variant="ghost" size="icon"` provides the correct focus states.
-
-**Action:** Use `Button` for input actions, positioning it absolutely with `right-0 top-0 h-full` to align perfectly with input height.
-
-
-
 ## 2026-02-05 - Dynamic Labels for Toggle Buttons
 
 **Learning:** For buttons that toggle state (like menus), prefer dynamic `aria-label` (e.g., "Menü öffnen" / "Menü schließen") over static labels when the icon changes or the context shifts significantly.
 
 **Action:** Use conditional `aria-label` logic in JSX for toggle components.
+
+## 2026-02-11 - Input Adornment Consistency
+**Learning:** Native `<label>` elements lack the design system's standardized styling and accessibility features provided by the `Label` component (`@/components/ui/label`). Also, custom buttons for input actions (like password toggles) are inconsistent.
+**Action:** Always replace native `<label>` with `<Label>` in forms, and use `<Button variant="ghost" size="icon">` for input adornments.
