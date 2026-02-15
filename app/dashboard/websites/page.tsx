@@ -251,49 +251,31 @@ export default function WebsitesPage() {
                     )}
 
                     <div className="flex items-center gap-3">
-                      {scan ? (
-                        <>
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAction(website.id, scan.id);
-                            }}
-                            className="font-bold h-10 px-4 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
-                          >
-                            <ShieldCheck className="h-3.5 w-3.5 mr-2" />
+                      <Button 
+                        size="sm" 
+                        variant={scan ? "outline" : "default"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAction(website.id, scan?.id);
+                        }}
+                        isLoading={isScanning === website.id}
+                        className={cn(
+                          "font-bold h-10 px-6",
+                          !scan && "bg-blue-600 shadow-lg shadow-blue-500/20"
+                        )}
+                      >
+                        {isScanning === website.id ? 'Scannen...' : scan ? (
+                          <>
+                            <ShieldCheck className="h-3.5 w-3.5" />
                             Bericht
-                          </Button>
-
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              startScan(website.id);
-                            }}
-                            isLoading={isScanning === website.id}
-                            className="text-slate-400 hover:text-blue-600 hover:bg-blue-50 h-10 w-10 p-0"
-                            title="Erneut scannen"
-                          >
-                            <RefreshCw className={cn("h-4 w-4", isScanning === website.id && "animate-spin")} />
-                          </Button>
-                        </>
-                      ) : (
-                        <Button 
-                          size="sm" 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            startScan(website.id);
-                          }}
-                          isLoading={isScanning === website.id}
-                          className="font-bold h-10 px-6 bg-blue-600 shadow-lg shadow-blue-500/20 hover:bg-blue-700 text-white"
-                        >
-                          <Play className="h-3.5 w-3.5 fill-current mr-2" />
-                          Jetzt scannen
-                        </Button>
-                      )}
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-3.5 w-3.5 fill-current" />
+                            Jetzt scannen
+                          </>
+                        )}
+                      </Button>
                       
                       <Button 
                         size="sm" 
