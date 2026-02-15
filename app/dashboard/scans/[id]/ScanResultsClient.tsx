@@ -283,7 +283,7 @@ export default function ScanResultsClient({ scan, agency }: ScanResultsClientPro
                   <div className="flex flex-col md:flex-row">
                     <div className={cn(
                       "w-full md:w-40 p-4 md:p-6 flex flex-row md:flex-col items-center justify-start md:justify-center text-left md:text-center gap-4 md:gap-2 border-b md:border-b-0 md:border-r",
-                      finding.severity === 'high' ? "bg-red-50/50" : finding.severity === 'medium" ? "bg-amber-50/50" : "bg-blue-50/50"
+                      finding.severity === 'high' ? "bg-red-50/50" : finding.severity === 'medium' ? "bg-amber-50/50" : "bg-blue-50/50"
                     )}>
                       <div className={cn(
                         "p-2 md:p-3 rounded-xl md:rounded-2xl",
