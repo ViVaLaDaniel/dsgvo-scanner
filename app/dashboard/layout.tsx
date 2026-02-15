@@ -144,6 +144,7 @@ export default function DashboardLayout({
             <button 
               onClick={() => alert('Sie haben aktuell keine neuen Benachrichtigungen. ✨')}
               className="relative rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all group"
+              aria-label="Benachrichtigungen anzeigen"
             >
               <Bell className="h-5 w-5" />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-blue-600 ring-2 ring-white" />
@@ -152,6 +153,7 @@ export default function DashboardLayout({
             <button 
               onClick={() => router.push('/dashboard/settings')}
               className="flex items-center gap-2 rounded-full bg-slate-100 p-1 pr-3 hover:bg-slate-200 transition-all"
+              aria-label="Benutzerkonto und Einstellungen"
             >
               <div className="h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center text-[10px] text-white font-bold leading-none">
                 {profile?.company_name?.substring(0, 2).toUpperCase() || '??'}
