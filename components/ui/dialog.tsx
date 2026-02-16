@@ -4,6 +4,7 @@ import * as React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface DialogProps {
   isOpen: boolean;
@@ -67,12 +68,15 @@ export function Dialog({
                 {title && <h3 className="text-2xl font-black text-slate-900 tracking-tight">{title}</h3>}
                 {description && <p className="text-sm font-medium text-slate-500">{description}</p>}
               </div>
-              <button
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={onClose}
-                className="p-2 rounded-full hover:bg-slate-100/50 text-slate-400 hover:text-slate-900 transition-colors"
+                className="rounded-full text-slate-400 hover:text-slate-900 hover:bg-slate-100/50"
+                aria-label="Close dialog"
               >
                 <X className="h-5 w-5" />
-              </button>
+              </Button>
             </div>
 
             {/* Content */}
