@@ -198,6 +198,13 @@ export default function WebsitesPage() {
               </div>
               <p className="text-slate-900 font-bold text-lg">Noch keine Websites hinzugefügt</p>
               <p className="text-sm text-slate-500 mt-2 font-medium">Verwalten Sie hier Ihre Mandanten.</p>
+              <Button
+                onClick={() => setShowAddForm(true)}
+                className="mt-6 font-bold shadow-lg shadow-blue-500/20"
+              >
+                <Plus className="h-4 w-4" />
+                Erste Website hinzufügen
+              </Button>
             </CardContent>
           </Card>
         ) : (
