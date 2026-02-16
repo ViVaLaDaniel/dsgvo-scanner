@@ -29,8 +29,7 @@ async function runLoadTest() {
   const totalTime = (endTime - startTime) / 1000;
   const avgTime = totalTime / CONCURRENT_REQUESTS;
 
-  console.log('
---- Load Test Results ---');
+  console.log('\n--- Load Test Results ---');
   console.log(`Total requests: ${CONCURRENT_REQUESTS}`);
   console.log(`Total time: ${totalTime.toFixed(2)} seconds`);
   console.log(`Average response time: ${avgTime.toFixed(2)} seconds per request`);

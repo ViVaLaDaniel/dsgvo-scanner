@@ -25,19 +25,42 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    const { error: loginError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (loginError) {
-      setError('E-Mail oder Passwort ist falsch');
+      if (loginError) {
+        console.error('Login Error:', loginError);
+
+        // Handle specific error cases
+        if (loginError.message.includes('Invalid login credentials')) {
+          setError('E-Mail oder Passwort ist falsch');
+        } else if (loginError.message.includes('Email not confirmed')) {
+          setError('Bitte bestätigen Sie Ihre E-Mail-Adresse vor dem Login.');
+        } else if (loginError.status === 500) {
+          setError('Serverfehler. Bitte versuchen Sie es später erneut.');
+        } else if (loginError.message.includes('Network request failed')) {
+           setError('Verbindungsfehler. Bitte prüfen Sie Ihre Internetverbindung.');
+        } else {
+          // Fallback to error message from Supabase or generic error
+          setError(loginError.message || 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+        }
+
+        setLoading(false);
+        return;
+      }
+
+      router.push('/dashboard');
+      router.refresh();
+    } catch (err: any) {
+      console.error('Unexpected Login Exception:', err);
+      // This catches unexpected client-side errors like missing env vars (if createClient didn't catch it)
+      // or other runtime exceptions.
+      setError(err.message || 'Ein unerwarteter Client-Fehler ist aufgetreten.');
       setLoading(false);
-      return;
     }
-
-    router.push('/dashboard');
-    router.refresh();
   };
 
   return (

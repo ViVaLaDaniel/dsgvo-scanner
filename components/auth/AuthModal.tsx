@@ -53,7 +53,22 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
           email: formData.email,
           password: formData.password
         });
-        if (loginError) throw loginError;
+
+        if (loginError) {
+          console.error('AuthModal Login Error:', loginError);
+          if (loginError.message.includes('Invalid login credentials')) {
+            throw new Error('E-Mail oder Passwort ist falsch');
+          } else if (loginError.message.includes('Email not confirmed')) {
+            throw new Error('Bitte bestätigen Sie Ihre E-Mail-Adresse.');
+          } else if (loginError.status === 500) {
+            throw new Error('Serverfehler. Bitte versuchen Sie es später erneut.');
+          } else if (loginError.message.includes('Network request failed')) {
+            throw new Error('Verbindungsfehler. Bitte prüfen Sie Ihre Internetverbindung.');
+          } else {
+            throw new Error(loginError.message || 'Ein Fehler ist aufgetreten');
+          }
+        }
+
         router.refresh();
         onClose();
         router.push('/dashboard');
@@ -68,7 +83,8 @@ export function AuthModal({ isOpen, onClose, initialView = 'login' }: AuthModalP
         }, 4000);
       }
     } catch (err: any) {
-      setError(err.message || 'Ein Fehler ist aufgetreten');
+      console.error('AuthModal Exception:', err);
+      setError(err.message || 'Ein unerwarteter Fehler ist aufgetreten');
     } finally {
       setLoading(false);
     }
