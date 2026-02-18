@@ -44,6 +44,7 @@ export function DemoModal({ isOpen, onClose }: DemoModalProps) {
     <Dialog 
       isOpen={isOpen} 
       onClose={onClose}
+      closeLabel="Schließen"
       title={isSubmitted ? "" : "Demo anfordern"}
       description={isSubmitted ? "" : "Erleben Sie den DSGVO Scanner live. Hinterlassen Sie Ihre Daten und wir melden uns innerhalb von 24h."}
     >

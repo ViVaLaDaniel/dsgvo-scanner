@@ -12,6 +12,7 @@ interface DialogProps {
   title?: string;
   description?: string;
   className?: string;
+  closeLabel?: string;
 }
 
 export function Dialog({
@@ -20,7 +21,8 @@ export function Dialog({
   children,
   title,
   description,
-  className
+  className,
+  closeLabel = "Close"
 }: DialogProps) {
   // Handle Escape key
   React.useEffect(() => {
@@ -69,6 +71,7 @@ export function Dialog({
               </div>
               <button
                 onClick={onClose}
+                aria-label={closeLabel}
                 className="p-2 rounded-full hover:bg-slate-100/50 text-slate-400 hover:text-slate-900 transition-colors"
               >
                 <X className="h-5 w-5" />
