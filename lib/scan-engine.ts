@@ -84,6 +84,8 @@ export const SCAN_PATTERNS = {
   }
 };
 
+const PATTERN_KEYS = Object.keys(SCAN_PATTERNS);
+
 // Optimization: Pre-compile a single Master Regex for O(N) scanning
 // instead of looping through patterns O(N*M).
 const MASTER_REGEX = new RegExp(
@@ -102,18 +104,20 @@ export function scanHtmlContent(html: string, detectedKeys: Set<string>): Findin
     if (!match.groups) continue;
 
     // Find which pattern matched
-    for (const key in match.groups) {
-      if (match.groups[key] !== undefined && !detectedKeys.has(key)) {
-        detectedKeys.add(key);
-        const pattern = SCAN_PATTERNS[key as keyof typeof SCAN_PATTERNS];
-        newFindings.push({
-          ...pattern.finding,
-          technical_details: {
-            source: 'static_analysis',
-            match: match.groups[key].substring(0, 200)
-          }
-        } as Finding);
-        // Once we found the matching group for this hit, break inner loop
+    for (const key of PATTERN_KEYS) {
+      if (match.groups[key] !== undefined) {
+        if (!detectedKeys.has(key)) {
+          detectedKeys.add(key);
+          const pattern = SCAN_PATTERNS[key as keyof typeof SCAN_PATTERNS];
+          newFindings.push({
+            ...pattern.finding,
+            technical_details: {
+              source: 'static_analysis',
+              match: match.groups[key].substring(0, 200)
+            }
+          } as Finding);
+        }
+        // Optimization: Stop checking other keys once the match is found
         break;
       }
     }
