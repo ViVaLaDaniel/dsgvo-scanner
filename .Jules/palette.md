@@ -41,3 +41,11 @@
 ## 2026-02-11 - Input Adornment Consistency
 **Learning:** Native `<label>` elements lack the design system's standardized styling and accessibility features provided by the `Label` component (`@/components/ui/label`). Also, custom buttons for input actions (like password toggles) are inconsistent.
 **Action:** Always replace native `<label>` with `<Label>` in forms, and use `<Button variant="ghost" size="icon">` for input adornments.
+
+## 2026-05-23 - Reusable Component Accessibility
+**Learning:** Base UI components (like Dialogs) must carry their own accessibility attributes (like `aria-label` on close buttons) as they are used throughout the application. Relying on the consumer to add these attributes is error-prone.
+**Action:** When creating or auditing reusable UI components, ensure internal interactive elements (like close buttons) have default accessible names.
+
+## 2026-05-23 - Default Language in Shared Components
+**Learning:** Even in single-language applications, shared UI components should default to English for broader compatibility and to avoid "hardcoded string" linting issues. Localization should be injected via props.
+**Action:** Use English defaults for component text props (e.g., `closeLabel="Close"`) and override them at the consumption level if necessary.
