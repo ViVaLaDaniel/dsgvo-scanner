@@ -158,6 +158,7 @@ export default function SettingsPage() {
                         <button 
                           onClick={() => setLocalAgency({ ...localAgency, logo_url: '' })}
                           className="absolute -top-2 -right-2 p-1.5 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors shadow-sm opacity-0 group-hover:opacity-100"
+                          aria-label="Logo entfernen"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -210,6 +211,7 @@ export default function SettingsPage() {
                         "h-10 w-10 rounded-xl border-2 transition-all p-0.5",
                         localAgency.brand_color === c.value ? "border-slate-900 scale-110 shadow-lg" : "border-transparent"
                       )}
+                      aria-label={`Farbe ${c.name} wählen`}
                     >
                       <div className="h-full w-full rounded-lg" style={{ backgroundColor: c.value }} />
                     </button>
