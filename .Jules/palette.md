@@ -41,3 +41,7 @@
 ## 2026-02-11 - Input Adornment Consistency
 **Learning:** Native `<label>` elements lack the design system's standardized styling and accessibility features provided by the `Label` component (`@/components/ui/label`). Also, custom buttons for input actions (like password toggles) are inconsistent.
 **Action:** Always replace native `<label>` with `<Label>` in forms, and use `<Button variant="ghost" size="icon">` for input adornments.
+
+## 2026-05-23 - Reusable Component Accessibility
+**Learning:** Base UI components (like Dialogs) must carry their own accessibility attributes (like `aria-label` on close buttons) since they are used across the application. Relying on the consumer to add these is error-prone.
+**Action:** Always check base components (in `components/ui`) for icon-only buttons and add `aria-label` directly in the component definition.
