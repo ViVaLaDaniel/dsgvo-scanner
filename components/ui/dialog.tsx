@@ -12,6 +12,7 @@ interface DialogProps {
   title?: string;
   description?: string;
   className?: string;
+  closeLabel?: string;
 }
 
 export function Dialog({
@@ -20,8 +21,12 @@ export function Dialog({
   children,
   title,
   description,
-  className
+  className,
+  closeLabel = "Dialog schließen"
 }: DialogProps) {
+  const titleId = React.useId();
+  const descriptionId = React.useId();
+
   // Handle Escape key
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -52,6 +57,10 @@ export function Dialog({
 
           {/* Modal Content */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
+            aria-describedby={description ? descriptionId : undefined}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -64,11 +73,12 @@ export function Dialog({
             {/* Header */}
             <div className="flex items-start justify-between p-6 pb-0">
               <div className="space-y-1">
-                {title && <h3 className="text-2xl font-black text-slate-900 tracking-tight">{title}</h3>}
-                {description && <p className="text-sm font-medium text-slate-500">{description}</p>}
+                {title && <h3 id={titleId} className="text-2xl font-black text-slate-900 tracking-tight">{title}</h3>}
+                {description && <p id={descriptionId} className="text-sm font-medium text-slate-500">{description}</p>}
               </div>
               <button
                 onClick={onClose}
+                aria-label={closeLabel}
                 className="p-2 rounded-full hover:bg-slate-100/50 text-slate-400 hover:text-slate-900 transition-colors"
               >
                 <X className="h-5 w-5" />

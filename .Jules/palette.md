@@ -41,3 +41,7 @@
 ## 2026-02-11 - Input Adornment Consistency
 **Learning:** Native `<label>` elements lack the design system's standardized styling and accessibility features provided by the `Label` component (`@/components/ui/label`). Also, custom buttons for input actions (like password toggles) are inconsistent.
 **Action:** Always replace native `<label>` with `<Label>` in forms, and use `<Button variant="ghost" size="icon">` for input adornments.
+
+## 2026-02-20 - Custom Dialog Accessibility
+**Learning:** Custom `Dialog` implementations built without accessibility libraries (like `@radix-ui/react-dialog`) often miss critical ARIA roles (`role="dialog"`, `aria-modal="true"`) and semantic labeling (`aria-labelledby`, `aria-describedby`), making them invisible or confusing to screen readers. `React.useId()` is the standard pattern to link titles/descriptions to the dialog container without ID collisions.
+**Action:** Always verify `Dialog` implementations include these ARIA attributes and use generated IDs for accessibility linkage.
